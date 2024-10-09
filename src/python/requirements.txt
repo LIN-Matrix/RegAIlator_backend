@@ -1,0 +1,6 @@
+tqdm
+PyMuPDF
+pdf2image
+pytesseract
+pandas
+openai
