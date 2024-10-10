@@ -1,5 +1,6 @@
 import argparse
 import tqdm
+import sys
 # Import the functions from the other files
 from src.llm import from_text_to_general_template_using_llm
 from src.adaptor import from_general_template_to_xlsx
@@ -61,14 +62,19 @@ def pipeline(test_data):
 
 
 if __name__ == '__main__':
-    # Add a debug mode to the script
-    parser = argparse.ArgumentParser(description="A script with a debug mode.")
-    parser.add_argument('--debug', action='store_true', help='Enable debug mode')
-    args = parser.parse_args()
-    # Pack the Input and Answer paths into a tuple, and then put them into the tests list
-    tests = []
-    for i in [2, 3, 4, 5]:
-        tests += [(f'./tests/input/Input_{i}.pdf', f'./tests/output/Output_{i}.xlsx', f'./tests/answer/Answer_{i}.xlsx')]
-    # Run the pipeline
-    pipeline(test_data=tests)
-    
+    # # Add a debug mode to the script
+    # parser = argparse.ArgumentParser(description="A script with a debug mode.")
+    # parser.add_argument('--debug', action='store_true', help='Enable debug mode')
+    # args = parser.parse_args()
+    # # Pack the Input and Answer paths into a tuple, and then put them into the tests list
+    # tests = []
+    # for i in [2, 3, 4, 5]:
+    #     tests += [(f'./tests/input/Input_{i}.pdf', f'./tests/output/Output_{i}.xlsx', f'./tests/answer/Answer_{i}.xlsx')]
+    # # Run the pipeline
+    # pipeline(test_data=tests)
+
+    # 将第一个参数作为输入文件路径
+    input_path = sys.argv[1]
+    text, _ = extract_text_from_pdf(input_path)
+    general_template = from_text_to_general_template_using_llm(text)
+    print(general_template)

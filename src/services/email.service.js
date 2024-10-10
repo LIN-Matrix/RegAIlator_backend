@@ -22,6 +22,7 @@ if (config.env !== 'test') {
  * @param {string} text
  * @returns {Promise}
  */
+// TODO
 const sendEmail = async (to, subject, text) => {
   const msg = { from: config.email.from, to, subject, text };
   await transport.sendMail(msg);
@@ -62,9 +63,21 @@ If you did not create an account, then ignore this email.`;
   await sendEmail(to, subject, text);
 };
 
+const sendMentionEmail = async (to, content) => {
+  const subject = 'You have been mentioned';
+  // replace this url with the link to the email verification page of your front-end app
+  const text = `Dear user, 
+
+You have been mentioned by ${subject} in a comment: ${content}
+
+If you did not create an account, then ignore this email.`;
+  await sendEmail(to, subject, text);
+}
+
 module.exports = {
   transport,
   sendEmail,
   sendResetPasswordEmail,
   sendVerificationEmail,
+  sendMentionEmail,
 };

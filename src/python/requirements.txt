@@ -1,5 +1,6 @@
 tqdm
-PyMuPDF
+PyMuPDF==1.21.1
+pdfplumber
 pdf2image
 pytesseract
 pandas

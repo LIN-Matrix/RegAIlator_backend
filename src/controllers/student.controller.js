@@ -13,7 +13,9 @@ const getStudents = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['id', 'userId', 'department']);
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'populate']);
   const deepPopulate = pick(req.query, ['deepPopulate']);
+  console.log('deepPopulate', deepPopulate);
   const result = await studentService.queryStudents(filter, options, deepPopulate);
+  console.log('result', result);
   res.send(result);
 });
 

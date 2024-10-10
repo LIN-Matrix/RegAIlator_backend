@@ -9,6 +9,7 @@ const StudentSchema = mongoose.Schema(
     instructors: [{ type: ObjectId, ref: 'Instructor' }],
     videoGroups: [{ type: ObjectId, ref: 'VideoGroup' }],
     department: { type: String },
+    status: { type: String, default: 'inactive' },
   },
   {
     timestamps: true,

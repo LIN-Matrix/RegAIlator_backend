@@ -73,11 +73,10 @@ const uploadFiles = catchAsync(async (req, res) => {
         const results = [];
 
         for (const file of req.files) {
-          const filePath = path.join(__dirname, '..', 'uploads', file.filename);
+          const filePath = path.join(__dirname, '../..', 'uploads', file.filename);
           
           // 调用 Python 脚本进行解析，在conda环境中运行
           const pythonProcess = spawn('python', [path.join(__dirname, '../python/parse_files.py'), filePath]);
-          console.log('pythonProcess', pythonProcess);
 
           let pythonOutput = '';
           pythonProcess.stdout.on('data', (data) => {
@@ -92,6 +91,7 @@ const uploadFiles = catchAsync(async (req, res) => {
             if (code === 0) {
               // 将解析的结果返回前端
               const parsedData = JSON.parse(pythonOutput);
+              console.log(parsedData);
               results.push({
                 file: file.filename,
                 result: parsedData,
