@@ -46,7 +46,7 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
 
   // 启动 HTTP 服务器并监听指定的端口
-  server = httpServer.listen(config.port, () => {
+  server = httpServer.listen(config.port, '0.0.0.0', () => {
     logger.info(`Listening to port ${config.port}`);
   });
 
