@@ -25,6 +25,10 @@ const envVarsSchema = Joi.object()
     EMAIL_FROM: Joi.string().description('the from field in the emails sent by the app'),
     WEB_HOST: Joi.string().description('web app host url'),
     HOST: Joi.string().description('api host url'),
+    EMAIL_USER: Joi.string().required().description('IMAP email username'),
+    EMAIL_PASSWORD: Joi.string().required().description('IMAP email password'),
+    EMAIL_HOST: Joi.string().required().description('IMAP email host, e.g., imap.gmail.com'),
+    EMAIL_PORT: Joi.number().default(993).description('IMAP email port, typically 993 for SSL'),
   })
   .unknown();
 
@@ -62,6 +66,12 @@ module.exports = {
       },
     },
     from: envVars.EMAIL_FROM,
+    imap: {
+      user: envVars.EMAIL_USER,
+      password: envVars.EMAIL_PASSWORD,
+      host: envVars.EMAIL_HOST,
+      port: envVars.EMAIL_PORT,
+    },
   },
   web_host: envVars.WEB_HOST,
   api_host: envVars.HOST,

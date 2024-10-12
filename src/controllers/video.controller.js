@@ -59,64 +59,71 @@ const path = require('path');
 
 const uploadFiles = catchAsync(async (req, res) => {
   return uploadVideos(req, res, async function (err) {
-    try {
-      if (err instanceof multer.MulterError) {
-        res.status(500).send({ error: { message: `Multer uploading error: ${err.message}` } }).end();
-        return;
-      }
-      if (err) {
-        res.status(500).send({ error: { message: `unknown uploading error: ${err.message}` } }).end();
-        return;
-      }
+      try {
+          if (err instanceof multer.MulterError) {
+              res.status(500).send({ error: { message: `Multer uploading error: ${err.message}` } }).end();
+              return;
+          }
+          if (err) {
+              res.status(500).send({ error: { message: `unknown uploading error: ${err.message}` } }).end();
+              return;
+          }
 
-      if (req.files && req.files.length) {
-        const results = [];
+          if (req.files && req.files.length) {
+              const results = [];
 
-        for (const file of req.files) {
-          const filePath = path.join(__dirname, '../..', 'uploads', file.filename);
-          
-          // 调用 Python 脚本进行解析，在conda环境中运行
-          const pythonProcess = spawn('python', [path.join(__dirname, '../python/parse_files.py'), filePath]);
+              for (const file of req.files) {
+                  const filePath = path.join(__dirname, '../..', 'uploads', file.filename);
+                  
+                  // 调用 Python 脚本进行解析
+                  const pythonProcess = spawn('python', [path.join(__dirname, '../python/parse_files.py'), filePath]);
 
-          let pythonOutput = '';
-          pythonProcess.stdout.on('data', (data) => {
-            pythonOutput += data.toString();
-          });
+                  let pythonOutput = '';
+                  pythonProcess.stdout.on('data', (data) => {
+                      pythonOutput += data.toString();
+                  });
 
-          pythonProcess.stderr.on('data', (data) => {
-            console.error(`stderr: ${data}`);
-          });
+                  pythonProcess.stderr.on('data', (data) => {
+                      console.error(`stderr: ${data}`);
+                  });
 
-          pythonProcess.on('close', (code) => {
-            if (code === 0) {
-              // 将解析的结果返回前端
-              const parsedData = JSON.parse(pythonOutput);
-              console.log(parsedData);
-              results.push({
-                file: file.filename,
-                result: parsedData,
-              });
+                  pythonProcess.on('close', async (code) => {
+                      if (code === 0) {
+                          const parsedData = JSON.parse(pythonOutput);
+                          console.log(parsedData);
+                          results.push({
+                              file: file.filename,
+                              result: parsedData,
+                          });
 
-              if (results.length === req.files.length) {
-                // 当所有文件都解析完毕时，返回结果
-                res.status(200).json({
-                  status: true,
-                  message: 'Files processed successfully',
-                  files: results,
-                });
+                          // 存储文件信息到数据库
+                          await videoService.createVideo({
+                              name: file.filename,
+                              path: filePath, // 或者你想要的其他路径
+                              addedBy: req.user._id,
+                              ...parsedData // 如果你想存储解析的数据
+                          });
+
+                          if (results.length === req.files.length) {
+                              // 当所有文件都解析完毕时，返回结果
+                              res.status(200).json({
+                                  status: true,
+                                  message: 'Files processed successfully',
+                                  files: results,
+                              });
+                          }
+                      } else {
+                          res.status(500).send({ error: { message: 'Error processing file with Python script' } }).end();
+                      }
+                  });
               }
-            } else {
-              res.status(500).send({ error: { message: 'Error processing file with Python script' } }).end();
-            }
-          });
-        }
-      } else {
-        res.status(400).send({ message: 'No files uploaded' }).end();
+          } else {
+              res.status(400).send({ message: 'No files uploaded' }).end();
+          }
+      } catch (e) {
+          console.error(e);
+          res.status(500).send({ error: { message: 'Internal server error' } }).end();
       }
-    } catch (e) {
-      console.error(e);
-      res.status(500).send({ error: { message: 'Internal server error' } }).end();
-    }
   });
 });
 
