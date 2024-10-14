@@ -15,7 +15,10 @@ const getStudents = catchAsync(async (req, res) => {
   const deepPopulate = pick(req.query, ['deepPopulate']);
   console.log('deepPopulate', deepPopulate);
   const result = await studentService.queryStudents(filter, options, deepPopulate);
-  console.log('result', result);
+  console.log('result: \n', result);
+  result.results.forEach((student, index) => {
+    console.log(`Student ${index + 1}:`, JSON.stringify(student.userId, null, 2));
+  });
   res.send(result);
 });
 

@@ -1,3 +1,5 @@
+const { Survey } = require("../models");
+
 const subUserRoles = {
   student: 'student',
   instructor: 'instructor',
@@ -39,6 +41,11 @@ const accessCategories = {
     manageErrorLog: 'manageErrorLog',
     all: ['getErrorLog', 'manageErrorLog'],
   },
+  survey: {
+    getSurveyTemplates: 'getSurveyTemplates',
+    manageSurveyTemplates: 'manageSurveyTemplates',
+    all: ['getSurveyTemplates', 'manageSurveyTemplates'],
+  }
 };
 
 const allRoles = {

@@ -56,6 +56,8 @@ const deleteVideo = catchAsync(async (req, res) => {
 
 const { spawn } = require('child_process');
 const path = require('path');
+const { title } = require('process');
+const { group } = require('console');
 
 const uploadFiles = catchAsync(async (req, res) => {
   return uploadVideos(req, res, async function (err) {
@@ -98,8 +100,10 @@ const uploadFiles = catchAsync(async (req, res) => {
 
                           // 存储文件信息到数据库
                           await videoService.createVideo({
-                              name: file.filename,
+                              title: file.filename,
                               path: filePath, // 或者你想要的其他路径
+                              group: req.body.group,
+                              accessState: "private", // 你的 accessState
                               addedBy: req.user._id,
                               ...parsedData // 如果你想存储解析的数据
                           });

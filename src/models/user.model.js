@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
 const { roles } = require('../configs/roles');
 
+const { ObjectId } = mongoose.SchemaTypes;
+
 const userSchema = mongoose.Schema(
   {
     firstname: { type: String, required: true, trim: true },
@@ -36,6 +38,9 @@ const userSchema = mongoose.Schema(
     role: { type: String, enum: roles, default: 'guest' },
     isEmailVerified: { type: Boolean, default: false },
     lastActiveAt: { type: Date },
+    status: { type: String, default: 'inactive' },
+    emails: { type: Array, default: []},
+    survey: { type: ObjectId, ref: 'Survey' },
   },
   {
     timestamps: true,
