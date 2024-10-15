@@ -71,6 +71,22 @@ const getUserById = async (id) => {
 };
 
 /**
+ * Get suppliers by id
+ * @param {ObjectId} id
+ * @returns {Promise<User>}
+ */
+const getSuppliersbyId = async (id) => {
+  return User.findById(id).populate('suppliers');
+}
+
+/**
+ * 
+ */
+const getSurveyById = async (id) => {
+  return User.findById(id).populate('surveys');
+}
+
+/**
  * Get user by email / username
  * @param {string} value
  * @returns {Promise<User>}
@@ -120,4 +136,6 @@ module.exports = {
   getUserByEmailOrUsername,
   updateUserById,
   deleteUserById,
+  getSuppliersbyId,
+  getSurveyById,
 };

@@ -5,4 +5,3 @@ module.exports.Video = require('./video.model');
 module.exports.WatchLog = require('./watchLog.model');
 module.exports.ErrorLog = require('./errorLog.model');
 module.exports.Email = require('./email.model');
-module.exports.Survey = require('./survey.model');

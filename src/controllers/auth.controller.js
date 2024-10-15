@@ -52,6 +52,18 @@ const sendMentionEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const getMySuppliers = catchAsync(async (req, res) => {
+  const user = await userService.getSuppliersbyId(req.user.id);
+  const suppliers = user.suppliers;
+  res.send(suppliers);
+});
+
+const getMySurveys = catchAsync(async (req, res) => {
+  const user = await userService.getSurveyById(req.user.id);
+  const surveys = user.surveys;
+  res.send(surveys);
+});
+
 const verifyEmail = catchAsync(async (req, res) => {
   await authService.verifyEmail(req.query.token);
   res.status(httpStatus.NO_CONTENT).send();
@@ -67,4 +79,6 @@ module.exports = {
   sendVerificationEmail,
   sendMentionEmail,
   verifyEmail,
+  getMySuppliers,
+  getMySurveys,
 };

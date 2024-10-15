@@ -6,4 +6,3 @@ module.exports.videoGroupService = require('./videoGroup.service');
 module.exports.videoService = require('./video.service');
 module.exports.watchLogService = require('./watchLog.service');
 module.exports.errorLogService = require('./errorLog.service');
-module.exports.surveyService = require('./survey.service');

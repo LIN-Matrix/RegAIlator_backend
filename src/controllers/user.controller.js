@@ -10,8 +10,11 @@ const createUser = catchAsync(async (req, res) => {
 });
 
 const getUsers = catchAsync(async (req, res) => {
+  // [FIXME] 不返回suppliers字段
   const filter = pick(req.query, ['name', 'role']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  // 添加以下行来排除 'suppliers' 字段
+  options.select = '-suppliers';
   const result = await userService.queryUsers(filter, options);
   console.log('result: \n', result);
   res.send(result);

@@ -6,6 +6,23 @@ const { roles } = require('../configs/roles');
 
 const { ObjectId } = mongoose.SchemaTypes;
 
+const surveySchema = mongoose.Schema(
+  {
+    title: { type: String, required: true }, // Survey的标题(创造者-时间-名称)
+    name: { type: String, required: true }, // 调查的名字
+    content: { type: String, required: true }, // 调查的内容
+    description: { type: String }, // 调查的描述
+    attachment: { type: String }, // 调查的附件
+    revision: { type: Number, default: 0 }, // 调查的版本号
+    createdAt: { type: Date, default: Date.now }, // 调查的创建时间
+    updatedAt: { type: Date }, // 调查的更新时间
+  },
+  {
+    _id: true,
+    timestamps: true, // 自动生成createdAt和updatedAt字段
+  }
+);
+
 // Define a sub-schema for suppliers
 const supplierSchema = mongoose.Schema(
   {
@@ -18,7 +35,10 @@ const supplierSchema = mongoose.Schema(
     feedback: { type: String },                     // Feedback
     supplierDocuments: { type: String },            // Supplier Documents
   },
-  { _id: false } // Prevent Mongoose from creating an _id field for subdocuments
+  {
+    _id: true,
+    timestamps: true,
+  }
 );
 
 const userSchema = mongoose.Schema(
@@ -59,7 +79,10 @@ const userSchema = mongoose.Schema(
       type: [supplierSchema], // An array of supplier subdocuments
       default: [],
     },
-    survey: { type: ObjectId, ref: 'Survey' },
+    surveys: {
+      type: [surveySchema], // An array of supplier subdocuments
+      default: [],
+    },
   },
   {
     timestamps: true,

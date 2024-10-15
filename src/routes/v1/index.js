@@ -6,7 +6,6 @@ const videoGroupRoute = require('./videoGroup.route');
 const videoRoute = require('./video.route');
 const watchLogRoute = require('./watchLog.route');
 const errorLogRoute = require('./errorLog.route');
-const surveyRoute = require('./survey.route');
 
 const docsRoute = require('./docs.route');
 const config = require('../../configs/config');
@@ -38,10 +37,6 @@ const defaultRoutes = [
     path: '/error-logs',
     route: errorLogRoute,
   },
-  {
-    path: '/survey-templates',
-    route: surveyRoute,
-  }
 ];
 
 const devRoutes = [
