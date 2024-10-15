@@ -1,7 +1,7 @@
 tqdm
-PyMuPDF==1.21.1
+PyMuPDF
 pdfplumber
 pdf2image
 pytesseract
 pandas
-openai
+openai==0.28.0
