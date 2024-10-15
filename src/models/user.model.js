@@ -30,7 +30,7 @@ const supplierSchema = mongoose.Schema(
     contact: { type: String },                      // Contact
     materialName: { type: String },                 // Material Name
     partNumber: { type: String },                   // Part Number
-    chooseSurvey: [{ type: ObjectId, ref: 'Survey' }], // Choose Survey (list of ObjectIds)
+    chooseSurvey: { type: ObjectId, ref: 'Survey' }, // Choose Survey (list of ObjectIds)
     status: { type: String },                       // Status
     feedback: { type: String },                     // Feedback
     supplierDocuments: { type: String },            // Supplier Documents

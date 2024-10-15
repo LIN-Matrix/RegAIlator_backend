@@ -17,6 +17,7 @@ router.post('/send-mention-email', auth(), authController.sendMentionEmail);
 router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail);
 router.get('/my-suppliers', auth(), authController.getMySuppliers);
 router.post('/my-suppliers', auth(), authController.createSupplier);
+router.put('/my-suppliers/:supplierId', auth(), authController.updateSupplier);
 router.get('/my-surveys', auth(), authController.getMySurveys);
 router.post('/my-surveys', auth(), authController.createSurvey);
 

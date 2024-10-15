@@ -79,10 +79,20 @@ const getSuppliersbyId = async (id) => {
   return User.findById(id).populate('suppliers');
 }
 
-createSupplier = async (id, supplierBody) => {
+const createSupplier = async (id, supplierBody) => {
   const user = await User.findById(id);
   user.suppliers.push(supplierBody);
   await user.save();
+  return user;
+}
+
+const updateSupplierById = async (id, supplierId, supplierBody) => {
+  const chooseSurvey = supplierBody.chooseSurvey;
+  const user = await User.findById(id);
+  const supplier = user.suppliers.id(supplierId);
+  supplier.chooseSurvey = chooseSurvey;
+  await user.save();
+  console.log(supplier);
   return user;
 }
 
@@ -151,6 +161,7 @@ module.exports = {
   updateUserById,
   deleteUserById,
   getSuppliersbyId,
+  updateSupplierById,
   createSupplier,
   getSurveyById,
   createSurvey,

@@ -64,6 +64,12 @@ const createSupplier = catchAsync(async (req, res) => {
   res.send(suppliers);
 });
 
+const updateSupplier = catchAsync(async (req, res) => {
+  const user = await userService.updateSupplierById(req.user.id, req.params.supplierId, req.body);
+  const suppliers = user.suppliers;
+  res.send(suppliers);
+});
+
 const getMySurveys = catchAsync(async (req, res) => {
   const user = await userService.getSurveyById(req.user.id);
   const surveys = user.surveys;
@@ -93,6 +99,7 @@ module.exports = {
   verifyEmail,
   getMySuppliers,
   createSupplier,
+  updateSupplier,
   getMySurveys,
   createSurvey,
 };
