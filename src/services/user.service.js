@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { User, Student, Instructor } = require('../models');
+const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { subUserRoles } = require('../configs/roles');
 
@@ -8,19 +8,14 @@ const { subUserRoles } = require('../configs/roles');
  * @param {Object} subUserBody
  * @returns {Promise<User>}
  */
-const createSubUser = async ({ role, userId, department, instructor }) => {
+const createSubUser = async ({ role, userId, department }) => {
   const subUserData = {
     userId,
     department,
   };
   switch (role) {
-    case subUserRoles.instructor:
-      return Instructor.create(subUserData);
-    case subUserRoles.student:
-      if (instructor) {
-        subUserData.instructors = [instructor];
-      }
-      return Student.create(subUserData);
+    case subUserRoles.user:
+      return User.create(subUserData);
     default:
   }
 };
@@ -37,7 +32,7 @@ const createUser = async (userBody) => {
   }
 
   let username;
-  const { firstname, lastname, role, department, instructor } = userBody;
+  const { firstname, lastname, role, department } = userBody;
 
   username = firstname.toLowerCase().substring(0, 1) + lastname.toLowerCase().substring(0, 6);
   if (await User.isUserNameTaken(username)) {
@@ -47,7 +42,7 @@ const createUser = async (userBody) => {
 
   const newUser = await User.create({ ...userBody, username });
   if (newUser && role) {
-    await createSubUser({ role, userId: newUser.id, department, instructor });
+    await createSubUser({ role, userId: newUser.id, department });
   }
 
   return newUser;

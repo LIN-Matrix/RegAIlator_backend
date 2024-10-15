@@ -1,7 +1,7 @@
 const Imap = require('imap');
 const { simpleParser } = require('mailparser');
 const Email = require('../models/email.model'); // 引入邮件模型
-const {User, Student} = require('../models');
+const {User} = require('../models');
 const config = require('../configs/config');
 
 const emailListener = (io) => {
@@ -138,17 +138,17 @@ const emailListener = (io) => {
                 // 2. 根据发件人的邮箱查找数据库中的学生或用户
                 const senderEmail = parsed.from.value[0].address; // 获取发件人的邮箱地址
 
-                const student = await User.findOne({ 'email': senderEmail }); // 查找匹配的学生记录
-                if (student) {
-                  // 打印出student
-                  console.log('Student:', student);
+                const user = await User.findOne({ 'email': senderEmail }); // 查找匹配的学生记录
+                if (user) {
+                  // user
+                  // console.log('user:', user);
                   // 3. 更新学生记录的 `reply` 字段为最新邮件内容
-                  student.emails = [...student.emails, email];
-                  await student.save();
-                  // 打印出更新后的student
-                  console.log('Student after update:', student);
+                  user.emails = [...user.emails, email];
+                  await user.save();
+                  // 打印出更新后的user
+                  // console.log('user after update:', user);
                 } else {
-                  console.log(`No student found with email: ${senderEmail}`);
+                  console.log(`No user found with email: ${senderEmail}`);
                 }
 
                 // 4. 通过 WebSocket 发送给前端

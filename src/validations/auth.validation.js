@@ -8,7 +8,6 @@ const register = {
     firstname: Joi.string().required(),
     lastname: Joi.string().required(),
     role: Joi.string(),
-    instructor: Joi.string().custom(objectId),
   }),
 };
 

@@ -30,8 +30,7 @@ videoGroupSchema.statics.isGroupNameTaken = async function (groupName, excludeGr
 
 videoGroupSchema.pre('remove', async function (next) {
   this.model('Video').remove({ group: this._id }, next);
-  this.model('Instructor').remove({ videoGroups: this._id }, next);
-  this.model('Student').remove({ videoGroups: this._id }, next);
+  this.model('User').remove({ videoGroups: this._id }, next);
 });
 
 /**

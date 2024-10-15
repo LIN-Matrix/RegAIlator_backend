@@ -6,6 +6,21 @@ const { roles } = require('../configs/roles');
 
 const { ObjectId } = mongoose.SchemaTypes;
 
+// Define a sub-schema for suppliers
+const supplierSchema = mongoose.Schema(
+  {
+    supplierName: { type: String, required: true }, // Supplier name
+    contact: { type: String },                      // Contact
+    materialName: { type: String },                 // Material Name
+    partNumber: { type: String },                   // Part Number
+    chooseSurvey: [{ type: ObjectId, ref: 'Survey' }], // Choose Survey (list of ObjectIds)
+    status: { type: String },                       // Status
+    feedback: { type: String },                     // Feedback
+    supplierDocuments: { type: String },            // Supplier Documents
+  },
+  { _id: false } // Prevent Mongoose from creating an _id field for subdocuments
+);
+
 const userSchema = mongoose.Schema(
   {
     firstname: { type: String, required: true, trim: true },
@@ -39,7 +54,11 @@ const userSchema = mongoose.Schema(
     isEmailVerified: { type: Boolean, default: false },
     lastActiveAt: { type: Date },
     status: { type: String, default: 'inactive' },
-    emails: { type: Array, default: []},
+    // Replace 'emails' with 'suppliers'
+    suppliers: {
+      type: [supplierSchema], // An array of supplier subdocuments
+      default: [],
+    },
     survey: { type: ObjectId, ref: 'Survey' },
   },
   {
@@ -92,8 +111,7 @@ userSchema.pre('save', async function (next) {
 });
 
 userSchema.pre('remove', async function (next) {
-  this.model('Instructor').remove({ userId: this._id }, next);
-  this.model('Student').remove({ userId: this._id }, next);
+  this.model('User').remove({ userId: this._id }, next);
 });
 /**
  * @typedef User

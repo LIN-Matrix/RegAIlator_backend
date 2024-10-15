@@ -1,25 +1,14 @@
 const { Survey } = require("../models");
 
 const subUserRoles = {
-  student: 'student',
-  instructor: 'instructor',
+  user: 'user',
 };
 
 const accessCategories = {
   user: {
     getUsers: 'getUsers',
     manageUsers: 'manageUsers',
-    instructor: {
-      getInstructors: 'getInstructors',
-      manageInstructors: 'manageInstructors',
-      all: ['getInstructors', 'manageInstructors'],
-    },
-    student: {
-      getStudents: 'getStudents',
-      manageStudents: 'manageStudents',
-      all: ['getStudents', 'manageStudents'],
-    },
-    all: ['getUsers', 'manageUsers', 'getInstructors', 'manageInstructors', 'getStudents', 'manageStudents'],
+    all: ['getUsers', 'manageUsers'],
   },
   videoGroup: {
     getVideoGroups: 'getVideoGroups',
@@ -55,8 +44,6 @@ const allRoles = {
     ...accessCategories.video.all,
     ...accessCategories.watchLog.all,
     ...accessCategories.errorLog.all,
-    accessCategories.user.student.getStudents,
-    accessCategories.user.instructor.getInstructors,
   ],
   supervisor: [
     ...accessCategories.user.all,
@@ -64,8 +51,6 @@ const allRoles = {
     ...accessCategories.video.all,
     ...accessCategories.watchLog.all,
     ...accessCategories.errorLog.all,
-    accessCategories.user.student.getStudents,
-    accessCategories.user.instructor.getInstructors,
   ],
   manager: [
     ...accessCategories.user.all,
@@ -73,26 +58,13 @@ const allRoles = {
     ...accessCategories.video.all,
     ...accessCategories.watchLog.all,
     ...accessCategories.errorLog.all,
-    accessCategories.user.student.getStudents,
-    accessCategories.user.instructor.getInstructors,
   ],
-  [subUserRoles.instructor]: [
+  [subUserRoles.user]: [
     ...accessCategories.user.all,
     ...accessCategories.videoGroup.all,
     ...accessCategories.video.all,
     ...accessCategories.watchLog.all,
     ...accessCategories.errorLog.all,
-    accessCategories.user.student.getStudents,
-    accessCategories.user.instructor.getInstructors,
-  ],
-  [subUserRoles.student]: [
-    ...accessCategories.user.all,
-    ...accessCategories.videoGroup.all,
-    ...accessCategories.video.all,
-    ...accessCategories.watchLog.all,
-    ...accessCategories.errorLog.all,
-    accessCategories.user.student.getStudents,
-    accessCategories.user.instructor.getInstructors,
   ],
   guest: [
     ...accessCategories.user.all,
@@ -100,8 +72,6 @@ const allRoles = {
     ...accessCategories.video.all,
     ...accessCategories.watchLog.all,
     ...accessCategories.errorLog.all,
-    accessCategories.user.student.getStudents,
-    accessCategories.user.instructor.getInstructors,
   ],
 };
 

@@ -2,8 +2,6 @@ const express = require('express');
 
 const authRoute = require('./auth.route');
 const userRoute = require('./user.route');
-const instructorRoute = require('./instructor.route');
-const studentRoute = require('./student.route');
 const videoGroupRoute = require('./videoGroup.route');
 const videoRoute = require('./video.route');
 const watchLogRoute = require('./watchLog.route');
@@ -23,14 +21,6 @@ const defaultRoutes = [
   {
     path: '/users',
     route: userRoute,
-  },
-  {
-    path: '/students',
-    route: studentRoute,
-  },
-  {
-    path: '/instructors',
-    route: instructorRoute,
   },
   {
     path: '/video-groups',
