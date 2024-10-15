@@ -58,8 +58,20 @@ const getMySuppliers = catchAsync(async (req, res) => {
   res.send(suppliers);
 });
 
+const createSupplier = catchAsync(async (req, res) => {
+  const user = await userService.createSupplier(req.user.id, req.body);
+  const suppliers = user.suppliers;
+  res.send(suppliers);
+});
+
 const getMySurveys = catchAsync(async (req, res) => {
   const user = await userService.getSurveyById(req.user.id);
+  const surveys = user.surveys;
+  res.send(surveys);
+});
+
+const createSurvey = catchAsync(async (req, res) => {
+  const user = await userService.createSurvey(req.user.id, req.body);
   const surveys = user.surveys;
   res.send(surveys);
 });
@@ -80,5 +92,7 @@ module.exports = {
   sendMentionEmail,
   verifyEmail,
   getMySuppliers,
+  createSupplier,
   getMySurveys,
+  createSurvey,
 };
