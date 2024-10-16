@@ -48,8 +48,8 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
 
 const sendMentionEmail = catchAsync(async (req, res) => {
   console.log(req.body);
-  await emailService.sendMentionEmail(req.body.email, req.body.mention);
-  res.status(httpStatus.NO_CONTENT).send();
+  await emailService.sendMentionEmail(req.body.email, req.body.subject, req.body.content);
+  res.send({ message: 'Email sent' });
 });
 
 const getMySuppliers = catchAsync(async (req, res) => {
