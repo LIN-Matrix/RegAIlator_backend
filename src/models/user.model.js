@@ -6,6 +6,20 @@ const { roles } = require('../configs/roles');
 
 const { ObjectId } = mongoose.SchemaTypes;
 
+// Define attachment sub-schema
+const attachmentSchema = mongoose.Schema(
+  {
+    filename: { type: String, required: true }, // 附件的文件名
+    contentType: { type: String, required: true }, // 附件的类型
+    size: { type: Number, required: true }, // 附件的大小
+    content: { type: String, required: true }, // 附件的内容
+  },
+  {
+    _id: true,
+    timestamps: true, // 自动生成createdAt和updatedAt字段
+  }
+);
+
 // Define emailReply sub-schema
 const emailReplySchema = mongoose.Schema(
   {
@@ -14,7 +28,7 @@ const emailReplySchema = mongoose.Schema(
     from: { type: String, required: true }, // 发件人邮箱
     to: { type: String, required: true }, // 收件人邮箱
     date: { type: Date, required: true }, // 邮件发送日期
-    attachments: { type: [String] }, // 邮件的附件（可以是多个）
+    attachments: { type: [attachmentSchema], default: [] }, // 邮件的附件（可以是多个）
   },
   {
     _id: true,

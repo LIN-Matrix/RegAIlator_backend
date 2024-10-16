@@ -2,34 +2,72 @@ const Imap = require('imap');
 const { simpleParser } = require('mailparser');
 const {User} = require('../models');
 const config = require('../configs/config');
+const fs = require('fs');
+const path = require('path');
 
+const extractEmail = (fromText) => {
+  const emailMatch = fromText.match(/<(.+?)>/);
+  return emailMatch ? emailMatch[1] : fromText;
+};
+
+const { v4: uuidv4 } = require('uuid'); // 用于生成唯一的文件名
 const saveEmailReply = async (parsed, bodyBuffer) => {
+  // 检查并创建附件存储文件夹
+  const attachmentsDir = path.join(__dirname, '../attachments');
+  if (!fs.existsSync(attachmentsDir)) {
+    fs.mkdirSync(attachmentsDir);
+  }
+
   const email = {
-    from: parsed.from.text,
-    to: parsed.to.text,
+    from: extractEmail(parsed.from.text),
+    to: extractEmail(parsed.to.text),
     subject: parsed.subject,
     date: parsed.date,
-    content: bodyBuffer, // 使用已经解码的正文
-    attachments: parsed.attachments
+    content: bodyBuffer || 'No body content', // 使用已经解码的正文
+    attachments: [] // 初始化附件数组
   };
-  // 通过 email.to 来获取user
-  const user = await User.findOne({
-    email: email.to
-  });
-  if (!user) {
-    console.log(`No user found with email: ${email.to}`);
+
+  // 如果有附件
+  if (parsed.attachments && parsed.attachments.length > 0) {
+    for (const att of parsed.attachments) {
+      // 生成唯一的文件名（使用 uuid 和 .pdf 后缀）
+      const uniqueFileName = `${uuidv4()}.pdf`;
+
+      // 构建保存文件的完整路径 (你可以根据需要调整存储路径)
+      const filePath = path.join(__dirname, '../../attachments', uniqueFileName);
+
+      // 将 Base64 内容写入 PDF 文件
+      fs.writeFileSync(filePath, att.content);
+
+      const fileUrl = `/attachments/${uniqueFileName}`;
+
+      console.log(`Attachment saved to: ${fileUrl}`);
+
+      // 将附件信息更新到 email.attachments 中，保存文件路径，注意不要存储了buffer
+      email.attachments.push({
+        filename: att.filename,
+        contentType: att.contentType,
+        size: att.size,
+        content: fileUrl
+      });
+    }
+  }
+
+  // 查找用户并保存反馈信息（不变的部分）
+  const all_users = await User.find();
+  const users = all_users.filter(user => user.suppliers.some(supplier => supplier.contact === email.from));
+
+  if (!users || !users.length) {
+    console.log(`No suppliers found with email: ${email.from}`);
     return;
   }
-  // 通过 email.from 来获取user中对应的supplier
-  const supplier = user.suppliers.find(supplier => supplier.email === email.from);
-  if (!supplier) {
-    console.log(`No supplier found with email: ${email.from}`);
-    return;
+
+  for (let user of users) {
+    const supplier = user.suppliers.find(supplier => supplier.contact === email.from);
+    supplier.feedback.push(email);
+    await user.save();
   }
-  supplier.feedback.push(email);
-  await user.save();
-  console.log('Email reply saved to supplier:', supplier);
-  return user;
+  return;
 };
 
 const emailListener = (io) => {
@@ -41,6 +79,11 @@ const emailListener = (io) => {
     tls: true,
     tlsOptions: {
       rejectUnauthorized: false
+    },
+    keepalive: {
+      interval: 10000, // 每隔10秒发送心跳包，保持连接活跃
+      idleInterval: 300000, // 5分钟空闲后重置连接
+      forceNoop: true // 如果服务器不支持 IDLE，强制使用 NOOP 命令
     }
   };
 
@@ -60,129 +103,53 @@ const emailListener = (io) => {
         console.log('No new unseen emails.');
         return;
       }
-
+  
       const f = imap.fetch(results, {
-        bodies: 'HEADER.FIELDS (FROM TO SUBJECT DATE)',
+        bodies: '',
         markSeen: true, // 标记邮件为已读
         struct: true
       });
-
+  
       f.on('message', (msg, seqno) => {
-        var bodyBuffer = ''; // 用于存储邮件正文
-        var contentType = ''; // 存储邮件内容的类型（plain 或 html）
-        const prefix = `(#${seqno}) `;
-
-        // console.log('Message #%d', seqno);
-        let buffer = '';
-
+        let allBuffers = []; // 用于存储邮件内容
+  
         msg.on('body', (stream) => {
           stream.on('data', (chunk) => {
-            buffer += chunk.toString('utf8');
+            allBuffers.push(chunk); // 将所有数据块保存到数组中
           });
         });
-
-        msg.once('attributes', function(attrs) {
-          // 提取正文部分
-          var parts = attrs.struct;
-          let fetchPartPromises = []; // 用来追踪所有的body part fetch操作
-
-          parts.forEach(function(part) {
-            if (Array.isArray(part)) {
-              part.forEach(function(subPart) {
-                if (subPart.subtype === 'plain' || subPart.subtype === 'html') {
-                  var encoding = subPart.encoding;
-                  contentType = subPart.subtype;
-
-                  // Fetch body part by partID
-                  fetchPartPromises.push(new Promise((resolve, reject) => {
-                    var f2 = imap.fetch(attrs.uid, {
-                      bodies: [subPart.partID],
-                      struct: true
-                    });
-
-                    f2.on('message', function(msg2) {
-                      msg2.on('body', function(stream2) {
-                        var buffer = '';
-                        stream2.on('data', function(chunk) {
-                          buffer += chunk.toString('utf8');
-                        });
-
-                        stream2.once('end', function() {
-                          if (encoding === 'BASE64') {
-                            // Decode BASE64 content
-                            var decodedContent = Buffer.from(buffer, 'base64').toString('utf8');
-                            bodyBuffer += decodedContent;
-                          } else {
-                            // Handle other encoding types if necessary
-                            bodyBuffer += buffer;
-                          }
-                          // console.log(prefix + 'Decoded content (' + contentType + '):', bodyBuffer);
-                          resolve(); // 成功获取并处理了body部分
-                        });
-                      });
-                    });
-
-                    f2.once('error', function(err) {
-                      console.log('Fetch error: ' + err);
-                      reject(err);
-                    });
-
-                    f2.once('end', function() {
-                      console.log('Done fetching body part.');
-                    });
-                  }));
-                }
-              });
+  
+        msg.once('end', async () => {
+          // 完整地抓取邮件后，合并所有数据块
+          const fullMessage = Buffer.concat(allBuffers).toString('utf8');
+  
+          // 使用 simpleParser 解析邮件，包括正文和附件
+          simpleParser(fullMessage, async (err, parsed) => {
+            if (err) {
+              console.error('Error parsing email:', err);
+              return;
+            }
+  
+            // console.log('Parsed email:', parsed);
+  
+            try {
+              // 保存邮件以及附件（如果有）
+              await saveEmailReply(parsed, parsed.text || parsed.html);
+  
+              // 通过 WebSocket 发送给前端
+              io.emit('newEmail', parsed); 
+              console.log('New email sent to front-end via WebSocket');
+            } catch (saveError) {
+              console.error('Error when saving and sending email:', saveError);
             }
           });
-
-          // 等待所有的body部分都被fetch完毕后再处理email
-          Promise.all(fetchPartPromises).then(() => {
-            // Process the email after the body is fully fetched
-            simpleParser(buffer, async (err, parsed) => {
-              if (err) {
-                console.error('Error parsing email:', err);
-                return;
-              }
-
-              console.log('Parsed email:', parsed);
-              try {
-                // 1. 保存邮件到 MongoDB
-                await saveEmailReply(parsed, bodyBuffer);
-
-                // 2. 根据发件人的邮箱查找数据库中的学生或用户
-                const senderEmail = parsed.from.value[0].address; // 获取发件人的邮箱地址
-
-                const user = await User.findOne({ 'email': senderEmail }); // 查找匹配的学生记录
-                if (user) {
-                  // user
-                  // 3. 更新学生记录的 `reply` 字段为最新邮件内容
-                  user.emails = [...user.emails, email];
-                  await user.save();
-                  // 打印出更新后的user
-                } else {
-                  console.log(`No user found with email: ${senderEmail}`);
-                }
-
-                // 4. 通过 WebSocket 发送给前端
-                io.emit('newEmail', email); // 向所有连接的客户端广播新邮件
-                console.log('New email sent to front-end via WebSocket');
-
-              } catch (saveError) {
-                console.error('Error saving email to MongoDB:', saveError);
-              }
-            });
-          }).catch((fetchErr) => {
-            console.error('Error fetching body parts:', fetchErr);
-          });
         });
-
       });
-
+  
       f.once('error', (err) => {
         console.error('Fetch error:', err);
       });
-
+  
       f.once('end', () => {
         console.log('Done fetching unseen emails.');
       });

@@ -59,6 +59,9 @@ app.use('/recordings', express.static(path.resolve('recordings')));
 
 app.use('/uploads', express.static(path.resolve('uploads')));
 
+// serve static files
+app.use('/attachments', express.static(path.resolve('attachments')));
+
 // app.use('/uploads', express.static(`${__dirname}/logs/`));
 
 // Health-check
