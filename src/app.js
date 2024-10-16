@@ -55,17 +55,17 @@ if (config.env === 'production') {
 // v1 api routes
 app.use('/api/v1', routes);
 
-app.use('/recordings', express.static(path.resolve('recordings')));
+app.use('/api/recordings', express.static(path.resolve('recordings')));
 
-app.use('/uploads', express.static(path.resolve('uploads')));
+app.use('/api/uploads', express.static(path.resolve('uploads')));
 
 // serve static files
-app.use('/attachments', express.static(path.resolve('attachments')));
+app.use('/api/attachments', express.static(path.resolve('attachments')));
 
 // app.use('/uploads', express.static(`${__dirname}/logs/`));
 
 // Health-check
-app.use('/', (req, res) => {
+app.use('/api/', (req, res) => {
   res.send('Hello from XRi API!');
 });
 

@@ -39,7 +39,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
       // 将 Base64 内容写入 PDF 文件
       fs.writeFileSync(filePath, att.content);
 
-      const fileUrl = `/attachments/${uniqueFileName}`;
+      const fileUrl = `/api/attachments/${uniqueFileName}`;
 
       console.log(`Attachment saved to: ${fileUrl}`);
 
