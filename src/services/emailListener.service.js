@@ -13,7 +13,7 @@ const extractEmail = (fromText) => {
 const { v4: uuidv4 } = require('uuid'); // 用于生成唯一的文件名
 const saveEmailReply = async (parsed, bodyBuffer) => {
   // 检查并创建附件存储文件夹
-  const attachmentsDir = path.join(__dirname, '../attachments');
+  const attachmentsDir = path.join(__dirname, '../../attachments');
   if (!fs.existsSync(attachmentsDir)) {
     fs.mkdirSync(attachmentsDir);
   }
