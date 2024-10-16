@@ -4,7 +4,6 @@ const socketIo = require('socket.io'); // 引入 socket.io 用于 WebSocket 实�
 const app = require('./app'); // 你的 Express 应用
 const config = require('./configs/config');
 const logger = require('./configs/logger');
-const Email = require('./models/email.model'); // 引入Email模型
 const emailListener = require('./services/emailListener.service'); // 引入邮件监听器
 
 let server;
@@ -20,21 +19,8 @@ const io = socketIo(httpServer, {
   }
 });
 
-// 当有新客户端通过 WebSocket 连接时，发送已有邮件数据
 io.on('connection', async (socket) => {
   console.log('New client connected');
-
-  try {
-    // 从 MongoDB 中获取所有邮件
-    const emails = await Email.find().sort({ date: -1 }).limit(10); // 获取最近10封邮件
-    // console.log('Sending existing emails to new client:', emails);
-    
-    // 发送邮件数据给新连接的客户端
-    socket.emit('initialEmails', emails);
-  } catch (error) {
-    console.error('Error fetching emails for new client:', error);
-  }
-
   socket.on('disconnect', () => {
     console.log('Client disconnected');
   });

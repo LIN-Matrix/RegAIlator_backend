@@ -1,8 +1,36 @@
 const Imap = require('imap');
 const { simpleParser } = require('mailparser');
-const Email = require('../models/email.model'); // 引入邮件模型
 const {User} = require('../models');
 const config = require('../configs/config');
+
+const saveEmailReply = async (parsed, bodyBuffer) => {
+  const email = {
+    from: parsed.from.text,
+    to: parsed.to.text,
+    subject: parsed.subject,
+    date: parsed.date,
+    content: bodyBuffer, // 使用已经解码的正文
+    attachments: parsed.attachments
+  };
+  // 通过 email.to 来获取user
+  const user = await User.findOne({
+    email: email.to
+  });
+  if (!user) {
+    console.log(`No user found with email: ${email.to}`);
+    return;
+  }
+  // 通过 email.from 来获取user中对应的supplier
+  const supplier = user.suppliers.find(supplier => supplier.email === email.from);
+  if (!supplier) {
+    console.log(`No supplier found with email: ${email.from}`);
+    return;
+  }
+  supplier.feedback.push(email);
+  await user.save();
+  console.log('Email reply saved to supplier:', supplier);
+  return user;
+};
 
 const emailListener = (io) => {
   const imapConfig = {
@@ -110,7 +138,6 @@ const emailListener = (io) => {
 
           // 等待所有的body部分都被fetch完毕后再处理email
           Promise.all(fetchPartPromises).then(() => {
-            // console.log(`All body parts fetched for message #${seqno}`);
             // Process the email after the body is fully fetched
             simpleParser(buffer, async (err, parsed) => {
               if (err) {
@@ -118,22 +145,10 @@ const emailListener = (io) => {
                 return;
               }
 
-              // console.log('Parsed email:', parsed);
-              
-              // 1. 存储邮件到MongoDB
+              console.log('Parsed email:', parsed);
               try {
-                const email = new Email({
-                  from: parsed.from.text,
-                  to: parsed.to.text,
-                  subject: parsed.subject,
-                  date: parsed.date,
-                  text: bodyBuffer, // 使用已经解码的正文
-                  html: parsed.html
-                });
-
-                // 保存邮件到MongoDB
-                await email.save();
-                console.log('Email saved to MongoDB:', email);
+                // 1. 保存邮件到 MongoDB
+                await saveEmailReply(parsed, bodyBuffer);
 
                 // 2. 根据发件人的邮箱查找数据库中的学生或用户
                 const senderEmail = parsed.from.value[0].address; // 获取发件人的邮箱地址
@@ -141,12 +156,10 @@ const emailListener = (io) => {
                 const user = await User.findOne({ 'email': senderEmail }); // 查找匹配的学生记录
                 if (user) {
                   // user
-                  // console.log('user:', user);
                   // 3. 更新学生记录的 `reply` 字段为最新邮件内容
                   user.emails = [...user.emails, email];
                   await user.save();
                   // 打印出更新后的user
-                  // console.log('user after update:', user);
                 } else {
                   console.log(`No user found with email: ${senderEmail}`);
                 }

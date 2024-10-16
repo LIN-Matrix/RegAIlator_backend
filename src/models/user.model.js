@@ -6,6 +6,40 @@ const { roles } = require('../configs/roles');
 
 const { ObjectId } = mongoose.SchemaTypes;
 
+// Define emailReply sub-schema
+const emailReplySchema = mongoose.Schema(
+  {
+    subject: { type: String, required: true }, // 邮件主题
+    content: { type: String, required: true }, // 邮件内容
+    from: { type: String, required: true }, // 发件人邮箱
+    to: { type: String, required: true }, // 收件人邮箱
+    date: { type: Date, required: true }, // 邮件发送日期
+    attachments: { type: [String] }, // 邮件的附件（可以是多个）
+  },
+  {
+    _id: true,
+    timestamps: true, // 自动生成createdAt和updatedAt字段
+  }
+);
+
+// Define a sub-schema for suppliers
+const supplierSchema = mongoose.Schema(
+  {
+    supplierName: { type: String, required: true }, // Supplier name
+    contact: { type: String },                      // Contact
+    materialName: { type: String },                 // Material Name
+    partNumber: { type: String },                   // Part Number
+    chooseSurvey: { type: ObjectId, ref: 'Survey', default: null }, // Choose Survey (list of ObjectIds)
+    status: { type: String },                       // Status
+    feedback: { type: [emailReplySchema], default: [] }, // List of email replies (emailReply)
+    supplierDocuments: { type: String },            // Supplier Documents
+  },
+  {
+    _id: true,
+    timestamps: true,
+  }
+);
+
 const surveySchema = mongoose.Schema(
   {
     title: { type: String, required: true }, // Survey的标题(创造者-时间-名称)
@@ -23,29 +57,11 @@ const surveySchema = mongoose.Schema(
   }
 );
 
-// Define a sub-schema for suppliers
-const supplierSchema = mongoose.Schema(
-  {
-    supplierName: { type: String, required: true }, // Supplier name
-    contact: { type: String },                      // Contact
-    materialName: { type: String },                 // Material Name
-    partNumber: { type: String },                   // Part Number
-    chooseSurvey: { type: ObjectId, ref: 'Survey' }, // Choose Survey (list of ObjectIds)
-    status: { type: String },                       // Status
-    feedback: { type: String },                     // Feedback
-    supplierDocuments: { type: String },            // Supplier Documents
-  },
-  {
-    _id: true,
-    timestamps: true,
-  }
-);
-
 const userSchema = mongoose.Schema(
   {
     firstname: { type: String, required: true, trim: true },
     lastname: { type: String, required: true, trim: true },
-    username: { type: String, required: true, unique: true, trim: true },
+    username: { type: String, unique: true, trim: true, default: function() { return `${this.firstname}_${this.lastname}`; }},
     email: {
       type: String,
       required: true,
@@ -74,13 +90,12 @@ const userSchema = mongoose.Schema(
     isEmailVerified: { type: Boolean, default: false },
     lastActiveAt: { type: Date },
     status: { type: String, default: 'inactive' },
-    // Replace 'emails' with 'suppliers'
     suppliers: {
       type: [supplierSchema], // An array of supplier subdocuments
       default: [],
     },
     surveys: {
-      type: [surveySchema], // An array of supplier subdocuments
+      type: [surveySchema], // An array of survey subdocuments
       default: [],
     },
   },
@@ -136,6 +151,7 @@ userSchema.pre('save', async function (next) {
 userSchema.pre('remove', async function (next) {
   this.model('User').remove({ userId: this._id }, next);
 });
+
 /**
  * @typedef User
  */

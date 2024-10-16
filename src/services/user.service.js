@@ -4,23 +4,6 @@ const ApiError = require('../utils/ApiError');
 const { subUserRoles } = require('../configs/roles');
 
 /**
- * Create a sub user
- * @param {Object} subUserBody
- * @returns {Promise<User>}
- */
-const createSubUser = async ({ role, userId, department }) => {
-  const subUserData = {
-    userId,
-    department,
-  };
-  switch (role) {
-    case subUserRoles.user:
-      return User.create(subUserData);
-    default:
-  }
-};
-
-/**
  * Create a user
  * @param {Object} userBody
  * @returns {Promise<User>}
@@ -31,21 +14,7 @@ const createUser = async (userBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
 
-  let username;
-  const { firstname, lastname, role, department } = userBody;
-
-  username = firstname.toLowerCase().substring(0, 1) + lastname.toLowerCase().substring(0, 6);
-  if (await User.isUserNameTaken(username)) {
-    username =
-      firstname.toLowerCase().substring(0, 1) + lastname.toLowerCase().substring(0, 6) + Math.floor(Math.random() * 90) + 1;
-  }
-
-  const newUser = await User.create({ ...userBody, username });
-  if (newUser && role) {
-    await createSubUser({ role, userId: newUser.id, department });
-  }
-
-  return newUser;
+  return User.create(userBody);
 };
 
 /**

@@ -22,7 +22,6 @@ if (config.env !== 'test') {
  * @param {string} text
  * @returns {Promise}
  */
-// TODO
 const sendEmail = async (to, subject, text) => {
   const msg = { from: config.email.from, to, subject, text };
   await transport.sendMail(msg);
@@ -63,8 +62,9 @@ If you did not create an account, then ignore this email.`;
   await sendEmail(to, subject, text);
 };
 
-const sendMentionEmail = async (to, subject, content) => {
-  await sendEmail(to, subject, content);
+const sendMentionEmail = async (from, to, subject, content) => {
+  const msg = { from, to, subject, text: content };
+  await transport.sendMail(msg);
 }
 
 module.exports = {

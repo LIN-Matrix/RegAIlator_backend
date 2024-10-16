@@ -47,9 +47,9 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
 });
 
 const sendMentionEmail = catchAsync(async (req, res) => {
-  console.log(req.body);
-  await emailService.sendMentionEmail(req.body.email, req.body.subject, req.body.content);
-  res.send({ message: 'Email sent' });
+  const user = await userService.getSuppliersbyId(req.user.id);
+  await emailService.sendMentionEmail(user.email, req.body.email, req.body.subject, req.body.content);
+  res.send({ message: 'Mention email sent' });
 });
 
 const getMySuppliers = catchAsync(async (req, res) => {
@@ -59,6 +59,14 @@ const getMySuppliers = catchAsync(async (req, res) => {
 });
 
 const createSupplier = catchAsync(async (req, res) => {
+  if (req.body.chooseSurvey==='') {
+    req.body.chooseSurvey = null;
+  }
+  // TODO: Add feedback to supplier
+  req.body.feedback = [];
+  if (req.body.feedback!=='') {
+
+  }
   const user = await userService.createSupplier(req.user.id, req.body);
   const suppliers = user.suppliers;
   res.send(suppliers);
