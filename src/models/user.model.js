@@ -75,7 +75,7 @@ const userSchema = mongoose.Schema(
   {
     firstname: { type: String, required: true, trim: true },
     lastname: { type: String, required: true, trim: true },
-    username: { type: String, unique: true, trim: true, default: function() { return `${this.firstname}_${this.lastname}`; }},
+    username: { type: String, trim: true, default: function() { return `${this.firstname}_${this.lastname}`; }},
     email: {
       type: String,
       required: true,
@@ -114,6 +114,7 @@ const userSchema = mongoose.Schema(
     },
   },
   {
+    _id: true,
     timestamps: true,
   }
 );
