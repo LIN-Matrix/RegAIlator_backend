@@ -2,3 +2,4 @@ node_modules
 src/python/include/openai_key.in
 src/python/src/__pycache__
 *.pyc
+.env
