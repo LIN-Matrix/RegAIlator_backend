@@ -7,14 +7,25 @@ const catchAsync = require('../utils/catchAsync');
 const { videoService } = require('../services');
 const config = require('../configs/config');
 const { removeVideoFile } = require('../utils/removeVideoFile');
+const fs = require('fs');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid'); // 用于生成唯一的文件名
+const { spawn } = require('child_process');
+const { title } = require('process');
+const { group } = require('console');
+const mime = require('mime'); // 导入mime模块
 
 const fileStorage = multer.diskStorage({
   destination(req, file, callback) {
-    callback(null, 'uploads/');
+    const uploadDir = 'uploads/';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    callback(null, uploadDir);
   },
   filename(req, file, callback) {
-    // const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    callback(null, file.originalname);
+    const uniqueFileName = `${uuidv4()}.pdf`;
+    callback(null, uniqueFileName);
   },
 });
 
@@ -54,28 +65,21 @@ const deleteVideo = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
-const { spawn } = require('child_process');
-const path = require('path');
-const { title } = require('process');
-const { group } = require('console');
-
 const uploadFiles = catchAsync(async (req, res) => {
   return uploadVideos(req, res, async function (err) {
       try {
           if (err instanceof multer.MulterError) {
-              res.status(500).send({ error: { message: `Multer uploading error: ${err.message}` } }).end();
-              return;
+              return res.status(500).send({ error: { message: `Multer uploading error: ${err.message}` } });
           }
           if (err) {
-              res.status(500).send({ error: { message: `unknown uploading error: ${err.message}` } }).end();
-              return;
+              return res.status(500).send({ error: { message: `unknown uploading error: ${err.message}` } });
           }
 
           if (req.files && req.files.length) {
               const results = [];
-
               for (const file of req.files) {
-                  const filePath = path.join(__dirname, '../..', 'uploads', file.filename);
+                  const filePath = path.join(__dirname, '../..', 'uploads', file.filename); // file.filename 已经是唯一名称
+                  const fileUrl = `/api/uploads/${file.filename}`;
                   
                   // 调用 Python 脚本进行解析
                   const pythonProcess = spawn('python', [path.join(__dirname, '../python/parse_files.py'), filePath]);
@@ -100,16 +104,15 @@ const uploadFiles = catchAsync(async (req, res) => {
 
                           // 存储文件信息到数据库
                           await videoService.createVideo({
-                              title: file.filename,
-                              path: filePath, // 或者你想要的其他路径
+                              title: file.originalname, // 保留原始文件名
+                              path: fileUrl,
                               group: req.body.group,
-                              accessState: "private", // 你的 accessState
+                              accessState: "private",
                               addedBy: req.user._id,
-                              ...parsedData // 如果你想存储解析的数据
+                              json: parsedData // 如果你想存储解析的数据
                           });
 
                           if (results.length === req.files.length) {
-                              // 当所有文件都解析完毕时，返回结果
                               res.status(200).json({
                                   status: true,
                                   message: 'Files processed successfully',
@@ -117,16 +120,16 @@ const uploadFiles = catchAsync(async (req, res) => {
                               });
                           }
                       } else {
-                          res.status(500).send({ error: { message: 'Error processing file with Python script' } }).end();
+                          res.status(500).send({ error: { message: 'Error processing file with Python script' } });
                       }
                   });
               }
           } else {
-              res.status(400).send({ message: 'No files uploaded' }).end();
+              res.status(400).send({ message: 'No files uploaded' });
           }
       } catch (e) {
           console.error(e);
-          res.status(500).send({ error: { message: 'Internal server error' } }).end();
+          res.status(500).send({ error: { message: 'Internal server error' } });
       }
   });
 });

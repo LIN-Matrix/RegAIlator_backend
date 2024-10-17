@@ -11,6 +11,8 @@ const videoSchema = mongoose.Schema(
     group: { type: ObjectId, ref: 'VideoGroup' },
     accessState: { type: String, enum: constants.accessState, default: 'private' },
     addedBy: { type: ObjectId, ref: 'User', required: true },
+    // json格式的数据
+    json: { type: Object, default: {} },
   },
   {
     timestamps: true,
@@ -27,8 +29,8 @@ videoSchema.plugin(paginate);
  * @param {ObjectId} [excludeVideoId] - The id of the user to be excluded
  * @returns {Promise<boolean>}
  */
-videoSchema.statics.isTitleTaken = async function (title, excludeVideoId) {
-  const video = await this.findOne({ title, _id: { $ne: excludeVideoId } });
+videoSchema.statics.isPathTaken = async function (path, excludeVideoId) {
+  const video = await this.findOne({ path, _id: { $ne: excludeVideoId } });
   return !!video;
 };
 

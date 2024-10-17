@@ -4,6 +4,7 @@ const {User} = require('../models');
 const config = require('../configs/config');
 const fs = require('fs');
 const path = require('path');
+const mime = require('mime'); // 导入mime模块
 
 const extractEmail = (fromText) => {
   const emailMatch = fromText.match(/<(.+?)>/);
@@ -30,13 +31,13 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
   // 如果有附件
   if (parsed.attachments && parsed.attachments.length > 0) {
     for (const att of parsed.attachments) {
-      // 生成唯一的文件名（使用 uuid 和 .pdf 后缀）
-      const uniqueFileName = `${uuidv4()}.pdf`;
-
+      // 生成唯一的文件名（使用 uuid 和 mime 模块）
+      const uniqueFileName = `${uuidv4()}.${mime.getExtension(att.contentType)}`;
+      
       // 构建保存文件的完整路径 (你可以根据需要调整存储路径)
       const filePath = path.join(__dirname, '../../attachments', uniqueFileName);
 
-      // 将 Base64 内容写入 PDF 文件
+      // 将 Base64 内容或 Buffer 写入文件，注意内容可能已经是 Buffer，不需要编码
       fs.writeFileSync(filePath, att.content);
 
       const fileUrl = `/api/attachments/${uniqueFileName}`;

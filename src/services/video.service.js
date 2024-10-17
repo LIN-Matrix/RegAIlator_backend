@@ -12,8 +12,8 @@ const { removeVideoFile } = require('../utils/removeVideoFile');
  * @returns {Promise<Video>}
  */
 const createVideo = async (videoBody) => {
-  if (videoBody.title && (await Video.isTitleTaken(videoBody.title))) {
-    return new ApiError(httpStatus.BAD_REQUEST, 'Video title already taken');
+  if (videoBody.path && (await Video.isPathTaken(videoBody.path))) {
+    return new ApiError(httpStatus.BAD_REQUEST, 'File path already taken');
   }
   return Video.create(videoBody);
 };
