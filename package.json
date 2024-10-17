@@ -63,6 +63,7 @@
     "joi": "^17.3.0",
     "jsonwebtoken": "^8.5.1",
     "mailparser": "^3.7.1",
+    "mime": "^1.4.1",
     "moment": "^2.24.0",
     "mongoose": "^5.13.22",
     "morgan": "^1.9.1",

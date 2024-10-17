@@ -15,6 +15,9 @@ const createVideo = async (videoBody) => {
   if (videoBody.path && (await Video.isPathTaken(videoBody.path))) {
     return new ApiError(httpStatus.BAD_REQUEST, 'File path already taken');
   }
+  if (videoBody.group === '') {
+    delete videoBody.group;
+  }
   return Video.create(videoBody);
 };
 
