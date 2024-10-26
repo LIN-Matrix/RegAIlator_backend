@@ -48,7 +48,7 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
 
 const sendMentionEmail = catchAsync(async (req, res) => {
   const user = await userService.getSuppliersbyId(req.user.id);
-  await emailService.sendMentionEmail(user.email, req.body.email, req.body.subject, req.body.content);
+  await emailService.sendMentionEmail(user.email, req.body.email, req.body.subject, req.body.content, user.email);
   res.send({ message: 'Mention email sent' });
 });
 
@@ -78,6 +78,12 @@ const updateSupplier = catchAsync(async (req, res) => {
   res.send(suppliers);
 });
 
+const deleteSuppliers = catchAsync(async (req, res) => {
+  const user = await userService.deleteSuppliersById(req.user.id, req.body.supplierIds);
+  const suppliers = user.suppliers;
+  res.send(suppliers);
+});
+
 const getMySurveys = catchAsync(async (req, res) => {
   const user = await userService.getSurveyById(req.user.id);
   const surveys = user.surveys;
@@ -86,6 +92,18 @@ const getMySurveys = catchAsync(async (req, res) => {
 
 const createSurvey = catchAsync(async (req, res) => {
   const user = await userService.createSurvey(req.user.id, req.body);
+  const surveys = user.surveys;
+  res.send(surveys);
+});
+
+const updateSurvey = catchAsync(async (req, res) => {
+  const user = await userService.updateSurveyById(req.user.id, req.params.surveyId, req.body);
+  const surveys = user.surveys;
+  res.send(surveys);
+});
+
+const deleteSurveys = catchAsync(async (req, res) => {
+  const user = await userService.deleteSurveysById(req.user.id, req.body.surveyIds);
   const surveys = user.surveys;
   res.send(surveys);
 });
@@ -108,6 +126,9 @@ module.exports = {
   getMySuppliers,
   createSupplier,
   updateSupplier,
+  deleteSuppliers,
   getMySurveys,
   createSurvey,
+  updateSurvey,
+  deleteSurveys,
 };

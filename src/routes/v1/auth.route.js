@@ -13,13 +13,18 @@ router.post('/refresh-tokens', validate(authValidation.refreshTokens), authContr
 router.post('/forgot-password', validate(authValidation.forgotPassword), authController.forgotPassword);
 router.post('/reset-password', validate(authValidation.resetPassword), authController.resetPassword);
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
-router.post('/send-mention-email', auth(), authController.sendMentionEmail);
 router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail);
+// Supplier
+router.post('/send-mention-email', auth(), authController.sendMentionEmail);
 router.get('/my-suppliers', auth(), authController.getMySuppliers);
 router.post('/my-suppliers', auth(), authController.createSupplier);
 router.put('/my-suppliers/:supplierId', auth(), authController.updateSupplier);
+router.delete('/my-suppliers', auth(), authController.deleteSuppliers);
+// Survey
 router.get('/my-surveys', auth(), authController.getMySurveys);
 router.post('/my-surveys', auth(), authController.createSurvey);
+router.put('/my-surveys/:surveyId', auth(), authController.updateSurvey);
+router.delete('/my-surveys', auth(), authController.deleteSurveys);
 
 module.exports = router;
 

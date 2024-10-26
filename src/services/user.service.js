@@ -55,6 +55,7 @@ const createSupplier = async (id, supplierBody) => {
   return user;
 }
 
+// TODO: Update supplier by id
 const updateSupplierById = async (id, supplierId, supplierBody) => {
   const chooseSurvey = supplierBody.chooseSurvey;
   const user = await User.findById(id);
@@ -62,6 +63,15 @@ const updateSupplierById = async (id, supplierId, supplierBody) => {
   supplier.chooseSurvey = chooseSurvey;
   await user.save();
   console.log(supplier);
+  return user;
+}
+
+const deleteSuppliersById = async (id, supplierIds) => {
+  const user = await User.findById(id);
+  supplierIds.forEach(supplierId => {
+    user.suppliers.id(supplierId).remove();
+  });
+  await user.save();
   return user;
 }
 
@@ -75,6 +85,23 @@ const getSurveyById = async (id) => {
 const createSurvey = async (id, surveyBody) => {
   const user = await User.findById(id);
   user.surveys.push(surveyBody);
+  await user.save();
+  return user;
+}
+
+const updateSurveyById = async (id, surveyId, surveyBody) => {
+  const user = await User.findById(id);
+  const survey = user.surveys.id(surveyId);
+  survey = surveyBody;
+  await user.save();
+  return user;
+}
+
+const deleteSurveysById = async (id, surveyIds) => {
+  const user = await User.findById(id);
+  surveyIds.forEach(surveyId => {
+    user.surveys.id(surveyId).remove();
+  });
   await user.save();
   return user;
 }
@@ -131,7 +158,10 @@ module.exports = {
   deleteUserById,
   getSuppliersbyId,
   updateSupplierById,
+  deleteSuppliersById,
   createSupplier,
   getSurveyById,
+  updateSurveyById,
+  deleteSurveysById,
   createSurvey,
 };
