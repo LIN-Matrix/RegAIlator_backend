@@ -60,7 +60,7 @@ const surveySchema = mongoose.Schema(
     name: { type: String, required: true }, // 调查的名字
     content: { type: String, required: true }, // 调查的内容
     description: { type: String }, // 调查的描述
-    attachment: { type: String }, // 调查的附件
+    attachments: { type: [attachmentSchema], default: [] }, // 调查的附件
     revision: { type: Number, default: 0 }, // 调查的版本号
     createdAt: { type: Date, default: Date.now }, // 调查的创建时间
     updatedAt: { type: Date }, // 调查的更新时间

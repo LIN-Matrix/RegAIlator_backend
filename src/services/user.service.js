@@ -82,7 +82,7 @@ const getSurveyById = async (id) => {
   return User.findById(id).populate('surveys');
 }
 
-const createSurvey = async (id, surveyBody) => {
+const createSurvey = async (id, surveyBody) => {  
   const user = await User.findById(id);
   user.surveys.push(surveyBody);
   await user.save();

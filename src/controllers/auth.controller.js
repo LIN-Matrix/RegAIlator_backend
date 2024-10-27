@@ -90,11 +90,26 @@ const getMySurveys = catchAsync(async (req, res) => {
   res.send(surveys);
 });
 
-const createSurvey = catchAsync(async (req, res) => {
-  const user = await userService.createSurvey(req.user.id, req.body);
+const createSurvey = async (req, res) => {
+  const surveyData = {
+    ...req.body,
+    attachments: [], // 初始化附件数组
+  };
+
+  // 处理上传的文件
+  if (req.files) {
+    surveyData.attachments = req.files.map(file => ({
+      content: `/api/uploads/${file.filename}`, // 根据您的存储方式调整
+      filename: file.originalname,
+      size: file.size,
+      contentType: file.mimetype,
+    }));
+  }
+
+  const user = await userService.createSurvey(req.user.id, surveyData);
   const surveys = user.surveys;
   res.send(surveys);
-});
+}
 
 const updateSurvey = catchAsync(async (req, res) => {
   const user = await userService.updateSurveyById(req.user.id, req.params.surveyId, req.body);

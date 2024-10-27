@@ -141,4 +141,5 @@ module.exports = {
   updateVideo,
   deleteVideo,
   uploadFiles,
+  uploadVideos,
 };

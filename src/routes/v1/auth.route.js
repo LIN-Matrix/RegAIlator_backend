@@ -3,6 +3,7 @@ const validate = require('../../middlewares/validate');
 const authValidation = require('../../validations/auth.validation');
 const authController = require('../../controllers/auth.controller');
 const auth = require('../../middlewares/auth');
+const videoController = require('../../controllers/video.controller');
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.put('/my-suppliers/:supplierId', auth(), authController.updateSupplier);
 router.delete('/my-suppliers', auth(), authController.deleteSuppliers);
 // Survey
 router.get('/my-surveys', auth(), authController.getMySurveys);
-router.post('/my-surveys', auth(), authController.createSurvey);
+router.post('/my-surveys', auth(), videoController.uploadVideos, authController.createSurvey);
 router.put('/my-surveys/:surveyId', auth(), authController.updateSurvey);
 router.delete('/my-surveys', auth(), authController.deleteSurveys);
 
