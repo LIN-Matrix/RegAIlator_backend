@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { authService, userService, tokenService, emailService } = require('../services');
+const path = require('path');
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -48,7 +49,14 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
 
 const sendMentionEmail = catchAsync(async (req, res) => {
   const user = await userService.getSuppliersbyId(req.user.id);
-  await emailService.sendMentionEmail(user.email, req.body.email, req.body.subject, req.body.content, user.email);
+  const survey = await user.surveys.id(req.body.survey._id);
+  const attachments = survey.attachments.map(attachment => ({
+    filename: attachment.filename,
+    size: attachment.size,
+    contentType: attachment.contentType,
+    path: path.join(__dirname, '../..', attachment.content.replace('/api/uploads/', 'uploads/')),
+  }));
+  await emailService.sendMentionEmail(user.email, req.body.email, survey.title, survey.content, attachments, user.email);
   res.send({ message: 'Mention email sent' });
 });
 

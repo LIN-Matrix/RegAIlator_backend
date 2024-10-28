@@ -62,8 +62,8 @@ If you did not create an account, then ignore this email.`;
   await sendEmail(to, subject, text);
 };
 
-const sendMentionEmail = async (from, to, subject, content, cc = null) => {
-  const msg = { from, to, subject, text: content, cc: cc };
+const sendMentionEmail = async (from, to, subject, content, attachments = null, cc = null) => {
+  const msg = { from, to, subject, text: content, cc, attachments };
   await transport.sendMail(msg);
 }
 
