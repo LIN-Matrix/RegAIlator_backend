@@ -59,15 +59,13 @@ const getMySuppliers = catchAsync(async (req, res) => {
 });
 
 const createSupplier = catchAsync(async (req, res) => {
-  if (req.body.chooseSurvey==='') {
-    req.body.chooseSurvey = null;
-  }
-  // TODO: Add feedback to supplier
-  req.body.feedback = [];
-  if (req.body.feedback!=='') {
-
-  }
   const user = await userService.createSupplier(req.user.id, req.body);
+  const suppliers = user.suppliers;
+  res.send(suppliers);
+});
+
+const createSupplierBatch = catchAsync(async (req, res) => {
+  const user = await userService.createSupplierBatch(req.user.id, req.body);
   const suppliers = user.suppliers;
   res.send(suppliers);
 });
@@ -146,4 +144,5 @@ module.exports = {
   createSurvey,
   updateSurvey,
   deleteSurveys,
+  createSupplierBatch,
 };

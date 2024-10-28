@@ -19,6 +19,7 @@ router.post('/verify-email', validate(authValidation.verifyEmail), authControlle
 router.post('/send-mention-email', auth(), authController.sendMentionEmail);
 router.get('/my-suppliers', auth(), authController.getMySuppliers);
 router.post('/my-suppliers', auth(), authController.createSupplier);
+router.post('/my-suppliers-batch', auth(), authController.createSupplierBatch);
 router.put('/my-suppliers/:supplierId', auth(), authController.updateSupplier);
 router.delete('/my-suppliers', auth(), authController.deleteSuppliers);
 // Survey

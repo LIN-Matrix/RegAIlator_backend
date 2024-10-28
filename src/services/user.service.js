@@ -49,8 +49,28 @@ const getSuppliersbyId = async (id) => {
 }
 
 const createSupplier = async (id, supplierBody) => {
+  // FIXME: 为了避免前端传入空字符串，将空字符串转换为 null
+  if (supplierBody.chooseSurvey==='') {
+    supplierBody.chooseSurvey = null;
+  }
+  supplierBody.feedback = [];
+
   const user = await User.findById(id);
   user.suppliers.push(supplierBody);
+  await user.save();
+  return user;
+}
+
+const createSupplierBatch = async (id, supplierBodies) => {
+  const user = await User.findById(id);
+  for (let supplierBody of supplierBodies) {
+    // FIXME: 为了避免前端传入空字符串，将空字符串转换为 null
+    if (supplierBody.chooseSurvey==='') {
+      supplierBody.chooseSurvey = null;
+    }
+    supplierBody.feedback = [];
+    user.suppliers.push(supplierBody);
+  }
   await user.save();
   return user;
 }
@@ -195,4 +215,5 @@ module.exports = {
   updateSurveyById,
   deleteSurveysById,
   createSurvey,
+  createSupplierBatch
 };
