@@ -26,6 +26,7 @@ router.delete('/my-suppliers', auth(), authController.deleteSuppliers);
 router.get('/my-surveys', auth(), authController.getMySurveys);
 router.post('/my-surveys', auth(), videoController.uploadVideos, authController.createSurvey);
 router.put('/my-surveys/:surveyId', auth(), authController.updateSurvey);
+router.post('/my-surveys/:surveyId/attachments', auth(), videoController.uploadVideos, authController.updateSurveyAttachments);
 router.delete('/my-surveys', auth(), authController.deleteSurveys);
 
 module.exports = router;

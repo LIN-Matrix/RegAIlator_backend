@@ -143,6 +143,10 @@ const updateSurveyById = async (userId, surveyId, surveyBody) => {
       survey[key] = surveyBody[key];
     }
   });
+  // [FIXME] 特殊处理，如果传入的是 add_attachments: formData，则将附件添加到 survey.attachments 中
+  if (surveyBody.add_attachments) {
+    survey.attachments.push(...surveyBody.add_attachments);
+  }
   await user.save();
   console.log('Updated Survey:', survey);
   return survey;
