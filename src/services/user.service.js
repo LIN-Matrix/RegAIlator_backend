@@ -55,16 +55,33 @@ const createSupplier = async (id, supplierBody) => {
   return user;
 }
 
-// TODO: Update supplier by id
-const updateSupplierById = async (id, supplierId, supplierBody) => {
-  const chooseSurvey = supplierBody.chooseSurvey;
-  const user = await User.findById(id);
+const updateSupplierById = async (userId, supplierId, supplierBody) => {
+  // 验证传入的 userId 和 supplierId
+  if (!userId || !supplierId) {
+    throw new Error('User ID and Supplier ID are required');
+  }
+  // 查找用户
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+  // 查找供应商
   const supplier = user.suppliers.id(supplierId);
-  supplier.chooseSurvey = chooseSurvey;
+  if (!supplier) {
+    throw new Error('Supplier not found');
+  }
+  // 遍历 supplierBody 中的字段并更新供应商信息
+  Object.keys(supplierBody).forEach((key) => {
+    // 仅更新在供应商模式中定义的字段，防止未定义字段的意外更新
+    if (supplier[key] !== undefined) {
+      supplier[key] = supplierBody[key];
+    }
+  });
+  // 保存更改
   await user.save();
-  console.log(supplier);
-  return user;
-}
+  console.log('Updated Supplier:', supplier);
+  return supplier;
+};
 
 const deleteSuppliersById = async (id, supplierIds) => {
   const user = await User.findById(id);
@@ -89,12 +106,26 @@ const createSurvey = async (id, surveyBody) => {
   return user;
 }
 
-const updateSurveyById = async (id, surveyId, surveyBody) => {
-  const user = await User.findById(id);
+const updateSurveyById = async (userId, surveyId, surveyBody) => {
+  if (!userId || !surveyId) {
+    throw new Error('User ID and Survey ID are required');
+  }
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
   const survey = user.surveys.id(surveyId);
-  survey = surveyBody;
+  if (!survey) {
+    throw new Error('Survey not found');
+  }
+  Object.keys(surveyBody).forEach((key) => {
+    if (survey[key] !== undefined) {
+      survey[key] = surveyBody[key];
+    }
+  });
   await user.save();
-  return user;
+  console.log('Updated Survey:', survey);
+  return survey;
 }
 
 const deleteSurveysById = async (id, surveyIds) => {
