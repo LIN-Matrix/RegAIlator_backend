@@ -103,6 +103,36 @@ const updateSupplierById = async (userId, supplierId, supplierBody) => {
   return supplier;
 };
 
+const updateSuppliersByIds = async (userId, body) => {
+  const  { supplierIds, supplierBody } = body;
+  // 验证传入的 userId 和 supplierId
+  if (!userId || !supplierIds) {
+    throw new Error('User ID and Supplier IDs are required');
+  }
+  // 查找用户
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+  // 查找供应商
+  supplierIds.forEach(supplierId => {
+    const supplier = user.suppliers.id(supplierId);
+    if (!supplier) {
+      throw new Error('Supplier not found');
+    }
+    // 遍历 supplierBody 中的字段并更新供应商信息
+    Object.keys(supplierBody).forEach((key) => {
+      // 仅更新在供应商模式中定义的字段，防止未定义字段的意外更新
+      if (supplier[key] !== undefined) {
+        supplier[key] = supplierBody[key];
+      }
+    });
+  });
+  // 保存更改
+  await user.save();
+  return user;
+};
+
 const deleteSuppliersById = async (id, supplierIds) => {
   const user = await User.findById(id);
   supplierIds.forEach(supplierId => {
@@ -213,6 +243,7 @@ module.exports = {
   deleteUserById,
   getSuppliersbyId,
   updateSupplierById,
+  updateSuppliersByIds,
   deleteSuppliersById,
   createSupplier,
   getSurveyById,

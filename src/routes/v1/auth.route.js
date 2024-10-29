@@ -21,6 +21,7 @@ router.get('/my-suppliers', auth(), authController.getMySuppliers);
 router.post('/my-suppliers', auth(), authController.createSupplier);
 router.post('/my-suppliers-batch', auth(), authController.createSupplierBatch);
 router.put('/my-suppliers/:supplierId', auth(), authController.updateSupplier);
+router.put('/my-suppliers', auth(), authController.updateSuppliers);
 router.delete('/my-suppliers', auth(), authController.deleteSuppliers);
 // Survey
 router.get('/my-surveys', auth(), authController.getMySurveys);

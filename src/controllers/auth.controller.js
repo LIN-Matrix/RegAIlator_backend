@@ -84,6 +84,12 @@ const updateSupplier = catchAsync(async (req, res) => {
   res.send(suppliers);
 });
 
+const updateSuppliers = catchAsync(async (req, res) => {
+  const user = await userService.updateSuppliersByIds(req.user.id, req.body);
+  const suppliers = user.suppliers;
+  res.send(suppliers);
+});
+
 const deleteSuppliers = catchAsync(async (req, res) => {
   const user = await userService.deleteSuppliersById(req.user.id, req.body.supplierIds);
   const suppliers = user.suppliers;
@@ -165,6 +171,7 @@ module.exports = {
   getMySuppliers,
   createSupplier,
   updateSupplier,
+  updateSuppliers,
   deleteSuppliers,
   getMySurveys,
   createSurvey,
