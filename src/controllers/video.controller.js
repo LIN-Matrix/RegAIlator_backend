@@ -81,48 +81,75 @@ const uploadFiles = catchAsync(async (req, res) => {
                   const filePath = path.join(__dirname, '../..', 'uploads', file.filename); // file.filename 已经是唯一名称
                   const fileUrl = `/api/uploads/${file.filename}`;
                   
-                  // 调用 Python 脚本进行解析
-                  const pythonProcess = spawn('python', [path.join(__dirname, '../python/parse_files.py'), filePath]);
+                  // 如果类型是pdf，调用 Python 脚本进行解析
+                  const type = mime.extension(file.mimetype);
+                  console.log(`Attachment content type: ${type}`);
+                  if (type === 'application/pdf' || type === 'pdf') {
+                    // 调用 Python 脚本进行解析
+                    const pythonProcess = spawn('python', [path.join(__dirname, '../python/parse_files.py'), filePath]);
 
-                  let pythonOutput = '';
-                  pythonProcess.stdout.on('data', (data) => {
-                      pythonOutput += data.toString();
-                  });
+                    let pythonOutput = '';
+                    pythonProcess.stdout.on('data', (data) => {
+                        pythonOutput += data.toString();
+                    });
 
-                  pythonProcess.stderr.on('data', (data) => {
-                      console.error(`stderr: ${data}`);
-                  });
+                    pythonProcess.stderr.on('data', (data) => {
+                        console.error(`stderr: ${data}`);
+                    });
 
-                  pythonProcess.on('close', async (code) => {
-                      if (code === 0) {
-                          const parsedData = JSON.parse(pythonOutput);
-                          console.log(parsedData);
-                          results.push({
-                              file: file.filename,
-                              result: parsedData,
-                          });
+                    pythonProcess.on('close', async (code) => {
+                        if (code === 0) {
+                            const parsedData = JSON.parse(pythonOutput);
+                            console.log(parsedData);
+                            results.push({
+                                file: file.filename,
+                                result: parsedData,
+                            });
 
-                          // 存储文件信息到数据库
-                          await videoService.createVideo({
-                              title: file.originalname, // 保留原始文件名
-                              path: fileUrl,
-                              group: req.body.group,
-                              accessState: "private",
-                              addedBy: req.user._id,
-                              json: parsedData // 如果你想存储解析的数据
-                          });
+                            // 存储文件信息到数据库
+                            await videoService.createVideo({
+                                title: file.originalname, // 保留原始文件名
+                                path: fileUrl,
+                                group: req.body.group,
+                                accessState: "private",
+                                addedBy: req.user._id,
+                                json: parsedData // 如果你想存储解析的数据
+                            });
 
-                          if (results.length === req.files.length) {
-                              res.status(200).json({
-                                  status: true,
-                                  message: 'Files processed successfully',
-                                  files: results,
-                              });
-                          }
-                      } else {
-                          res.status(500).send({ error: { message: 'Error processing file with Python script' } });
-                      }
-                  });
+                            if (results.length === req.files.length) {
+                                res.status(200).json({
+                                    status: true,
+                                    message: 'Files processed successfully',
+                                    files: results,
+                                });
+                            }
+                        } else {
+                            res.status(500).send({ error: { message: 'Error processing file with Python script' } });
+                        }
+                    });
+                  } else {
+                    const parsedData = {};
+                    results.push({
+                      file: file.filename,
+                      result: parsedData,
+                    });
+                    // 存储文件信息到数据库
+                    await videoService.createVideo({
+                      title: file.originalname, // 保留原始文件名
+                      path: fileUrl,
+                      group: req.body.group,
+                      accessState: "private",
+                      addedBy: req.user._id,
+                      json: parsedData // 如果你想存储解析的数据
+                    });
+                    if (results.length === req.files.length) {
+                      res.status(200).json({
+                        status: true,
+                        message: 'Files processed successfully',
+                        files: results,
+                      });
+                    }
+                  }
               }
           } else {
               res.status(400).send({ message: 'No files uploaded' });

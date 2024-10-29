@@ -8,7 +8,6 @@ const videoSchema = mongoose.Schema(
   {
     title: { type: String, required: true },
     path: { type: String, required: true },
-    group: { type: ObjectId, ref: 'VideoGroup' },
     accessState: { type: String, enum: constants.accessState, default: 'private' },
     addedBy: { type: ObjectId, ref: 'User', required: true },
     // json格式的数据

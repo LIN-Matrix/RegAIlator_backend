@@ -3,3 +3,9 @@ src/python/include/openai_key.in
 src/python/src/__pycache__
 *.pyc
 .env
+*.pdf
+*.txt
+*.html
+*.xlsx
+*.csv
+*.json
