@@ -15,14 +15,19 @@ def extract_text_from_pdf(pdf_path):
             text_by_page += [temp]
 
     if text == '':
-        # If the text is empty, use OCR to extract text from the PDF
-        images = convert_from_path(pdf_path)
-        for image in images:
-            temp = pytesseract.image_to_string(image)
-            # 去除空行和连续的空格
-            temp = '\n'.join([line.strip() for line in temp.split('\n') if line.strip() != ''])
-            text += temp
-            text_by_page += [temp]
+        try:
+            # If the text is empty, use OCR to extract text from the PDF
+            images = convert_from_path(pdf_path)
+            for image in images:
+                temp = pytesseract.image_to_string(image)
+                # 去除空行和连续的空格
+                temp = '\n'.join([line.strip() for line in temp.split('\n') if line.strip() != ''])
+                text += temp
+                text_by_page += [temp]
+        except Exception as e:
+            print(f"Error converting PDF to images: {e}")
+            # 根据需要返回空文本或其他默认值
+            return '', []
     return text, text_by_page
 
 
