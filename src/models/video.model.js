@@ -12,8 +12,7 @@ const videoSchema = mongoose.Schema(
     addedBy: { type: ObjectId, ref: 'User', required: true },
     // json格式的数据
     json: { type: Object, default: {} },
-    // [TODO] supplier: { type: ObjectId, ref: 'Supplier' },
-    supplier: { type: String },
+    supplier: { type: ObjectId, ref: 'Supplier', default: null },
   },
   {
     timestamps: true,

@@ -66,6 +66,7 @@ const deleteVideo = catchAsync(async (req, res) => {
 });
 
 const uploadFiles = catchAsync(async (req, res) => {
+  const supplierId = req.params.supplierId;
   return uploadVideos(req, res, async function (err) {
       try {
           if (err instanceof multer.MulterError) {
@@ -113,6 +114,7 @@ const uploadFiles = catchAsync(async (req, res) => {
                                 group: req.body.group,
                                 accessState: "private",
                                 addedBy: req.user._id,
+                                supplier: supplierId,
                                 json: parsedData // 如果你想存储解析的数据
                             });
 
@@ -140,6 +142,7 @@ const uploadFiles = catchAsync(async (req, res) => {
                       group: req.body.group,
                       accessState: "private",
                       addedBy: req.user._id,
+                      supplier: supplierId,
                       json: parsedData // 如果你想存储解析的数据
                     });
                     if (results.length === req.files.length) {

@@ -19,5 +19,6 @@ router
   .delete(auth(roles.accessCategories.video.manageVideo), validate(video.deleteVideo), videoController.deleteVideo);
 
 router.route('/upload_file').post(auth(roles.accessCategories.video.manageVideo), videoController.uploadFiles);
+router.route('/upload_file/:supplierId').post(auth(roles.accessCategories.video.manageVideo), videoController.uploadFiles);
 
 module.exports = router;
