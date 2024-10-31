@@ -68,7 +68,6 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
           });
 
           // 如果类型是pdf，调用 Python 脚本进行解析
-
           console.log(`Attachment content type: ${att.contentType}`);
           if (att.contentType === 'application/pdf' || att.contentType === 'pdf') {
             // 调用 Python 脚本进行解析
@@ -90,7 +89,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
                     path: fileUrl,
                     addedBy: users[0]._id,
                     json: parsedData, // 如果你想存储解析的数据
-                    supplier: email.from, // 根据需要调整
+                    supplier: users[0]._id,
                   });
                 } catch (videoError) {
                   console.error('Error saving video information:', videoError);
@@ -107,7 +106,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
               path: fileUrl,
               addedBy: users[0]._id,
               json: parsedData, // 如果你想存储解析的数据
-              supplier: email.from, // 根据需要调整
+              supplier: users[0]._id,
             });
           }
         } catch (attError) {
