@@ -36,6 +36,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
     const users = all_users.filter((user) =>
       user.suppliers.some((supplier) => supplier.contact === email.from)
     );
+    const supplier = users[0].suppliers.find((supplier) => supplier.contact === email.from);
 
     if (!users || !users.length) {
       console.log(`No suppliers found with email: ${email.from}`);
@@ -89,7 +90,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
                     path: fileUrl,
                     addedBy: users[0]._id,
                     json: parsedData, // 如果你想存储解析的数据
-                    supplier: users[0]._id,
+                    supplier: supplier._id,
                   });
                 } catch (videoError) {
                   console.error('Error saving video information:', videoError);
@@ -106,7 +107,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
               path: fileUrl,
               addedBy: users[0]._id,
               json: parsedData, // 如果你想存储解析的数据
-              supplier: users[0]._id,
+              supplier: supplier._id,
             });
           }
         } catch (attError) {
