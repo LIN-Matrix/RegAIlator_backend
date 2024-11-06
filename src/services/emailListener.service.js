@@ -36,12 +36,12 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
     const users = all_users.filter((user) =>
       user.suppliers.some((supplier) => supplier.contact === email.from)
     );
-    const supplier = users[0].suppliers.find((supplier) => supplier.contact === email.from);
-
     if (!users || !users.length) {
       console.log(`No suppliers found with email: ${email.from}`);
       return;
     }
+    
+    const supplier = users[0].suppliers.find((supplier) => supplier.contact === email.from);
 
     // 如果有附件
     if (parsed.attachments && parsed.attachments.length > 0) {
