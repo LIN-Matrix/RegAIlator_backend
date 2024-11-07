@@ -15,6 +15,7 @@ const videoSchema = mongoose.Schema(
     supplier: { type: ObjectId, ref: 'Supplier', default: null },
   },
   {
+    _id: true,
     timestamps: true,
   }
 );

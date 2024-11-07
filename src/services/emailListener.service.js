@@ -25,23 +25,38 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
     const email = {
       from: extractEmail(parsed.from.text),
       to: extractEmail(parsed.to.text),
+      cc: parsed.cc ? extractEmail(parsed.cc.text) : undefined,
       subject: parsed.subject,
       date: parsed.date,
       content: bodyBuffer || 'No body content', // 使用已经解码的正文
       attachments: [], // 初始化附件数组
     };
 
-    // 查找用户并保存反馈信息
-    const all_users = await User.find();
-    const users = all_users.filter((user) =>
-      user.suppliers.some((supplier) => supplier.contact === email.from)
-    );
+    let users = [];
+    if (email.cc) {
+      // 邮箱字符检查时忽略大小写
+      const user = await User.findOne({ email: email.cc.toLowerCase() });
+      if (user) {
+        users.push(user);
+        // console.log(`User found with email: ${email.cc}`);
+      } else {
+        console.log(`No user found with email: ${email.cc}`);
+        return;
+      }
+    } else {
+      // 查找用户并保存反馈信息
+      const all_users = await User.find();
+      // 邮箱字符检查时忽略大小写
+      users = all_users.filter((user) =>
+        // user.suppliers.some((supplier) => supplier.contact === email.from)
+        user.suppliers.some((supplier) => supplier.contact.toLowerCase() === email.from.toLowerCase())
+      );
+      // console.log(`Users ${users.length} still found with supplier's email: ${email.from}`);
+    }
     if (!users || !users.length) {
       console.log(`No suppliers found with email: ${email.from}`);
       return;
     }
-    
-    const supplier = users[0].suppliers.find((supplier) => supplier.contact === email.from);
 
     // 如果有附件
     if (parsed.attachments && parsed.attachments.length > 0) {
@@ -85,13 +100,20 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
                 try {
                   const parsedData = JSON.parse(pythonOutput);
                   // 保存文件信息到数据库
-                  await videoService.createVideo({
-                    title: att.filename,
-                    path: fileUrl,
-                    addedBy: users[0]._id,
-                    json: parsedData, // 如果你想存储解析的数据
-                    supplier: supplier._id,
-                  });
+                  for (let user of users) {
+                    const supplier = user.suppliers.find((supplier) => supplier.contact === email.from);
+                    if (!supplier) {
+                      console.log(`No supplier found with email: ${email.from}`);
+                      continue;
+                    }
+                    await videoService.createVideo({
+                      title: att.filename,
+                      path: fileUrl,
+                      addedBy: users[0]._id,
+                      json: parsedData, // 如果你想存储解析的数据
+                      supplier: supplier._id,
+                    });
+                  }
                 } catch (videoError) {
                   console.error('Error saving video information:', videoError);
                 }
@@ -102,13 +124,20 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
           } else {
             const parsedData = {};
             // 保存文件信息到数据库
-            await videoService.createVideo({
-              title: att.filename,
-              path: fileUrl,
-              addedBy: users[0]._id,
-              json: parsedData, // 如果你想存储解析的数据
-              supplier: supplier._id,
-            });
+            for (let user of users) {
+              const supplier = user.suppliers.find((supplier) => supplier.contact === email.from);
+              if (!supplier) {
+                console.log(`No supplier found with email: ${email.from}`);
+                continue;
+              }
+              await videoService.createVideo({
+                title: att.filename,
+                path: fileUrl,
+                addedBy: users[0]._id,
+                json: parsedData, // 如果你想存储解析的数据
+                supplier: supplier._id,
+              });
+            }
           }
         } catch (attError) {
           console.error(`Error processing attachment ${att.filename}:`, attError);
@@ -116,8 +145,14 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
       }
     }
 
+    // console.log('Email:', email);
+
     for (let user of users) {
       const supplier = user.suppliers.find((supplier) => supplier.contact === email.from);
+      if (!supplier) {
+        console.log(`No supplier found with email: ${email.from}`);
+        continue;
+      }
       supplier.feedback.push(email);
       await user.save();
     }
