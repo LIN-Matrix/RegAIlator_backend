@@ -1,7 +1,8 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { authService, userService, tokenService, emailService } = require('../services');
+const { authService, userService, tokenService, emailService, materialService } = require('../services');
 const path = require('path');
+const pick = require('../utils/pick');
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -158,6 +159,24 @@ const verifyEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const getMyBillOfMaterials = catchAsync(async (req, res) => {
+  req.query.user = req.user.id;
+  const filter = pick(req.query, ['user', 'supplier', 'material', 'addedBy']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const result = await materialService.queryBillOfMaterials(filter, options);
+  res.send(result);
+});
+
+const createBillOfMaterial = catchAsync(async (req, res) => {
+  const result = await materialService.createBillOfMaterial(req.user.id, req.body);
+  res.send(result);
+});
+
+const createBillOfMaterialsBatch = catchAsync(async (req, res) => {
+  const result = await materialService.createBillOfMaterialsBatch(req.user.id, req.body);
+  res.send(result);
+});
+
 module.exports = {
   register,
   login,
@@ -179,4 +198,7 @@ module.exports = {
   deleteSurveys,
   createSupplierBatch,
   updateSurveyAttachments,
+  getMyBillOfMaterials,
+  createBillOfMaterial,
+  createBillOfMaterialsBatch,
 };

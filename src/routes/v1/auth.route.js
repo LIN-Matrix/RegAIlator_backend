@@ -29,6 +29,10 @@ router.post('/my-surveys', auth(), videoController.uploadVideos, authController.
 router.put('/my-surveys/:surveyId', auth(), authController.updateSurvey);
 router.post('/my-surveys/:surveyId/attachments', auth(), videoController.uploadVideos, authController.updateSurveyAttachments);
 router.delete('/my-surveys', auth(), authController.deleteSurveys);
+// Bill of Materials
+router.get('/my-bill-of-materials', auth(), authController.getMyBillOfMaterials);
+router.post('/my-bill-of-materials', auth(), authController.createBillOfMaterial);
+router.post('/my-bill-of-materials-batch-add', auth(), authController.createBillOfMaterialsBatch);
 
 module.exports = router;
 
