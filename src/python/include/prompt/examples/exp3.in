@@ -53,9 +53,9 @@ Nanomaterials: Original, Jan.2017; Revision, Jan. 2018; Ver. 02
     "data": [
         {
             "Date": "Jan-22  ",
-            "Vendor": "Sun Chemical Corporation ",
-            "Product name": "Nanomaterials ",
-            "Product part number": "",
+            "Supplier name": "Sun Chemical Corporation ",
+            "Raw material name": "Nanomaterials ",
+            "Raw material part number": "",
             "Regulation or substance name": "Nanomaterials",
             "Compliant conclusion\n(Compliant, not compliant, not applicable or unclear)": "Unclear",
             "Compliant conclusion justification": "This includes inorganic and organic pigments, along with many natural and synthetic fillers and additives\ncommonly used in conjunction with pigment. Organic pigments have never been offered in a “macro” version, as\nsuch a version would lack the performance properties that make them of commercial value.",

@@ -46,9 +46,9 @@ cc: Sherry Fang, Maurice Long
     "data": [
         {
             "Date": "Jul-24",
-            "Vendor": "Smurfit WestRock",
-            "Product name": "Printed Folding Cartons",
-            "Product part number": "",
+            "Supplier name": "Smurfit WestRock",
+            "Raw material name": "Printed Folding Cartons",
+            "Raw material part number": "",
             "Regulation or substance name": "Mineral oil",
             "Compliant conclusion\n(Compliant, not compliant, not applicable or unclear)": "Compliant",
             "Compliant conclusion justification": "Mineral oil are not intentionally used or added as ingredients in the printing inks.",
