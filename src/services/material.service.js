@@ -26,8 +26,36 @@ const createBillOfMaterialsBatch = async (userId, materialBody) => {
     return Material.insertMany(materialBody);
 }
 
+const updateBillOfMaterialById = async (userId, materialId, materialBody) => {
+    const material = await Material.findById(materialId);
+    if (!material) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Material not found');
+    }
+    if (material.user != userId) {
+        throw new ApiError(httpStatus.FORBIDDEN, 'Forbidden');
+    }
+    Object.assign(material, materialBody);
+    await material.save();
+    return material;
+}
+
+const deleteBillOfMaterialsByIds = async (userId, materialIds) => {
+    console.log('materialIds: ', materialIds);
+    const materials = await Material.find({ _id: { $in: materialIds } });
+    for (let i = 0; i < materials.length; i++) {
+        if (materials[i].user != userId) {
+            throw new ApiError(httpStatus.FORBIDDEN, 'Forbidden');
+        }
+    }
+    await Material.deleteMany({ _id: { $in: materialIds } });
+    console.log('materials: ', materials);
+    return materials;
+}
+
 module.exports = {
     queryBillOfMaterials,
     createBillOfMaterial,
-    createBillOfMaterialsBatch
+    createBillOfMaterialsBatch,
+    updateBillOfMaterialById,
+    deleteBillOfMaterialsByIds,
 };

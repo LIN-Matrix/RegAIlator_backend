@@ -33,6 +33,8 @@ router.delete('/my-surveys', auth(), authController.deleteSurveys);
 router.get('/my-bill-of-materials', auth(), authController.getMyBillOfMaterials);
 router.post('/my-bill-of-materials', auth(), authController.createBillOfMaterial);
 router.post('/my-bill-of-materials-batch-add', auth(), authController.createBillOfMaterialsBatch);
+router.put('/my-bill-of-materials/:billOfMaterialId', auth(), authController.updateBillOfMaterial);
+router.delete('/my-bill-of-materials', auth(), authController.deleteBillOfMaterials);
 
 module.exports = router;
 

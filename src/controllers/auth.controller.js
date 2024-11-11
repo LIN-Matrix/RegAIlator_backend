@@ -177,6 +177,16 @@ const createBillOfMaterialsBatch = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const updateBillOfMaterial = catchAsync(async (req, res) => {
+  const result = await materialService.updateBillOfMaterialById(req.user.id, req.params.billOfMaterialId, req.body);
+  res.send(result);
+});
+
+const deleteBillOfMaterials = catchAsync(async (req, res) => {
+  const result = await materialService.deleteBillOfMaterialsByIds(req.user.id, req.body);
+  res.send(result);
+});
+
 module.exports = {
   register,
   login,
@@ -201,4 +211,6 @@ module.exports = {
   getMyBillOfMaterials,
   createBillOfMaterial,
   createBillOfMaterialsBatch,
+  updateBillOfMaterial,
+  deleteBillOfMaterials,
 };
