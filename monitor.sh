@@ -8,9 +8,9 @@ while true; do
 
     # 监控 out.log 文件的新内容
     tail -n0 -F out.log | while read LINE; do
-        echo "$LINE" | grep -q "IMAP connection closed"
+        echo "$LINE" | grep -q -E "IMAP connection (closed|ended)"
         if [ $? -eq 0 ]; then
-            echo "检测到 IMAP connection closed，正在重新启动 npm run dev..."
+            echo "检测到 IMAP connection closed 或 IMAP connection ended，正在重新启动 npm run dev..."
             kill $NPM_PID
             break
         fi
