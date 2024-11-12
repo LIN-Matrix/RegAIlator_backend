@@ -40,7 +40,7 @@ const emailReplySchema = mongoose.Schema(
 const supplierSchema = mongoose.Schema(
   {
     supplierName: { type: String, required: true }, // Supplier name
-    contact: { type: String, trim: true, lowercase: true },                      // Contact
+    contact: { type: String, trim: true },          // Contact
     materialName: { type: String },                 // Material Name
     partNumber: { type: String },                   // Part Number
     chooseSurvey: { type: ObjectId, ref: 'Survey', default: null }, // Choose Survey (list of ObjectIds)

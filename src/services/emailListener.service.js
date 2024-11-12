@@ -101,7 +101,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
                   const parsedData = JSON.parse(pythonOutput);
                   // 保存文件信息到数据库
                   for (let user of users) {
-                    const supplier = user.suppliers.find((supplier) => supplier.contact === email.from);
+                    const supplier = user.suppliers.find((supplier) => supplier.contact.toLowerCase() === email.from.toLowerCase());
                     if (!supplier) {
                       console.log(`No supplier found with email: ${email.from}`);
                       continue;
@@ -125,7 +125,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
             const parsedData = {};
             // 保存文件信息到数据库
             for (let user of users) {
-              const supplier = user.suppliers.find((supplier) => supplier.contact === email.from);
+              const supplier = user.suppliers.find((supplier) => supplier.contact.toLowerCase() === email.from.toLowerCase());
               if (!supplier) {
                 console.log(`No supplier found with email: ${email.from}`);
                 continue;
@@ -148,7 +148,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
     // console.log('Email:', email);
 
     for (let user of users) {
-      const supplier = user.suppliers.find((supplier) => supplier.contact === email.from);
+      const supplier = user.suppliers.find((supplier) => supplier.contact.toLowerCase() === email.from.toLowerCase());
       if (!supplier) {
         console.log(`No supplier found with email: ${email.from}`);
         continue;
