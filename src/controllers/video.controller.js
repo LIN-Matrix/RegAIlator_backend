@@ -174,7 +174,20 @@ const parseVideos = catchAsync(async (req, res) => {
     // 根据 filename 的最后面的文件类型
     const type = path.extname(video.title).slice(1);
     // console.log(`Attachment content type: ${type} of the path: ${filePath}`);
-    if (type === 'application/pdf' || type === 'pdf') {
+    // 如果 json 数据已经存在，则直接返回，不去运行解析
+    if (video.json && Object.keys(video.json).length) {
+      results.push({
+        file: video.title,
+        result: video.json,
+      });
+      if (results.length === videos.results.length) {
+        res.status(200).json({
+          status: true,
+          message: 'Files processed successfully',
+          files: results,
+        });
+      }
+    } else if (type === 'application/pdf' || type === 'pdf') {
       // 调用 Python 脚本进行解析
       const pythonProcess = spawn('python', [path.join(__dirname, '../python/parse_files.py'), filePath]);
 
@@ -200,7 +213,6 @@ const parseVideos = catchAsync(async (req, res) => {
                 file: video.title,
                 result: parsedData,
               });
-
               if (results.length === videos.results.length) {
                   res.status(200).json({
                       status: true,
@@ -219,6 +231,13 @@ const parseVideos = catchAsync(async (req, res) => {
         file: video.title,
         result: {},
       });
+      if (results.length === videos.results.length) {
+        res.status(200).json({
+          status: true,
+          message: 'Files processed successfully',
+          files: results,
+        });
+      }
     }
   }
 });
