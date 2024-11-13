@@ -49,7 +49,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
       // 邮箱字符检查时忽略大小写
       users = all_users.filter((user) =>
         // user.suppliers.some((supplier) => supplier.contact === email.from)
-        user.suppliers.some((supplier) => supplier.contact.toLowerCase() === email.from.toLowerCase())
+        user.suppliers.some((supplier) => supplier.contact?.toLowerCase() === email.from?.toLowerCase())
       );
       // console.log(`Users ${users.length} still found with supplier's email: ${email.from}`);
     }
@@ -85,47 +85,47 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
 
           // 如果类型是pdf，调用 Python 脚本进行解析
           console.log(`Attachment content type: ${att.contentType}`);
-          if (att.contentType === 'application/pdf' || att.contentType === 'pdf') {
-            // 调用 Python 脚本进行解析
-            const pythonProcess = spawn('python', [path.join(__dirname, '../python/parse_files.py'), filePath]);
-            let pythonOutput = '';
-            pythonProcess.stdout.on('data', (data) => {
-              pythonOutput += data.toString();
-            });
-            pythonProcess.stderr.on('data', (data) => {
-              console.error(`stderr: ${data}`);
-            });
-            pythonProcess.on('close', async (code) => {
-              if (code === 0) {
-                try {
-                  const parsedData = JSON.parse(pythonOutput);
-                  // 保存文件信息到数据库
-                  for (let user of users) {
-                    const supplier = user.suppliers.find((supplier) => supplier.contact.toLowerCase() === email.from.toLowerCase());
-                    if (!supplier) {
-                      console.log(`No supplier found with email: ${email.from}`);
-                      continue;
-                    }
-                    await videoService.createVideo({
-                      title: att.filename,
-                      path: fileUrl,
-                      addedBy: users[0]._id,
-                      json: parsedData, // 如果你想存储解析的数据
-                      supplier: supplier._id,
-                    });
-                  }
-                } catch (videoError) {
-                  console.error('Error saving video information:', videoError);
-                }
-              } else {
-                console.error('Error processing file with Python script');
-              }
-            });
-          } else {
+          // if (att.contentType === 'application/pdf' || att.contentType === 'pdf') {
+          //   // 调用 Python 脚本进行解析
+          //   const pythonProcess = spawn('python', [path.join(__dirname, '../python/parse_files.py'), filePath]);
+          //   let pythonOutput = '';
+          //   pythonProcess.stdout.on('data', (data) => {
+          //     pythonOutput += data.toString();
+          //   });
+          //   pythonProcess.stderr.on('data', (data) => {
+          //     console.error(`stderr: ${data}`);
+          //   });
+          //   pythonProcess.on('close', async (code) => {
+          //     if (code === 0) {
+          //       try {
+          //         const parsedData = JSON.parse(pythonOutput);
+          //         // 保存文件信息到数据库
+          //         for (let user of users) {
+          //           const supplier = user.suppliers.find((supplier) => supplier.contact?.toLowerCase() === email.from?.toLowerCase());
+          //           if (!supplier) {
+          //             console.log(`No supplier found with email: ${email.from}`);
+          //             continue;
+          //           }
+          //           await videoService.createVideo({
+          //             title: att.filename,
+          //             path: fileUrl,
+          //             addedBy: users[0]._id,
+          //             json: parsedData, // 如果你想存储解析的数据
+          //             supplier: supplier._id,
+          //           });
+          //         }
+          //       } catch (videoError) {
+          //         console.error('Error saving video information:', videoError);
+          //       }
+          //     } else {
+          //       console.error('Error processing file with Python script');
+          //     }
+          //   });
+          // } else {
             const parsedData = {};
             // 保存文件信息到数据库
             for (let user of users) {
-              const supplier = user.suppliers.find((supplier) => supplier.contact.toLowerCase() === email.from.toLowerCase());
+              const supplier = user.suppliers.find((supplier) => supplier.contact?.toLowerCase() === email.from?.toLowerCase());
               if (!supplier) {
                 console.log(`No supplier found with email: ${email.from}`);
                 continue;
@@ -138,7 +138,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
                 supplier: supplier._id,
               });
             }
-          }
+          // }
         } catch (attError) {
           console.error(`Error processing attachment ${att.filename}:`, attError);
         }

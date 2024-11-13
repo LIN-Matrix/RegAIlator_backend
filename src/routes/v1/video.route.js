@@ -21,4 +21,6 @@ router
 router.route('/upload_file').post(auth(roles.accessCategories.video.manageVideo), videoController.uploadFiles);
 router.route('/upload_file/:supplierId').post(auth(roles.accessCategories.video.manageVideo), videoController.uploadFiles);
 
+router.route('/parse').post(auth(roles.accessCategories.video.manageVideo), videoController.parseVideos);
+
 module.exports = router;

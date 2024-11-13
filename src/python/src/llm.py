@@ -18,15 +18,15 @@ def from_text_to_general_template_using_llm(text, input_length=16385, answer_len
         openai.api_key = open(f'{dir_path}/../include/openai_key.in', 'r').read()
         prompt = get_prompt()
         # 给 text 做截断处理
-        text = text[:input_length] # This model's maximum context length is 16385 tokens.
+        # text = text[:input_length] # This model's maximum context length is 16385 tokens.
         
         response1 = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="o1-preview",
             messages=[
-                    {"role": "system", "content": prompt},
-                    {"role": "user", "content": text},
+                    # {"role": "system", "content": prompt},
+                    {"role": "user", "content": prompt + text},
                 ],
-            max_tokens=answer_length,  # 控制生成的回复长度(最大为4096)
-            temperature=0.1,  # 控制生成文本的创造性（0-1之间，越高越随机）
+            # max_tokens=answer_length,  # 控制生成的回复长度(最大为4096)
+            # temperature=0.1,  # 控制生成文本的创造性（0-1之间，越高越随机）
         )
         return response1.choices[0].message.content

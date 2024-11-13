@@ -93,8 +93,13 @@ const updateSupplierById = async (userId, supplierId, supplierBody) => {
   // 遍历 supplierBody 中的字段并更新供应商信息
   Object.keys(supplierBody).forEach((key) => {
     // 仅更新在供应商模式中定义的字段，防止未定义字段的意外更新
-    if (supplier[key] !== undefined) {
+    // if (supplier[key] !== undefined) {
+    //   supplier[key] = supplierBody[key];
+    // }
+    try {
       supplier[key] = supplierBody[key];
+    } catch (error) {
+      console.log('updateSupplierById Error:', error);
     }
   });
   // 保存更改
@@ -122,9 +127,14 @@ const updateSuppliersByIds = async (userId, body) => {
     }
     // 遍历 supplierBody 中的字段并更新供应商信息
     Object.keys(supplierBody).forEach((key) => {
-      // 仅更新在供应商模式中定义的字段，防止未定义字段的意外更新
-      if (supplier[key] !== undefined) {
+      // // 仅更新在供应商模式中定义的字段，防止未定义字段的意外更新
+      // if (supplier[key] !== undefined) {
+      //   supplier[key] = supplierBody[key];
+      // }
+      try {
         supplier[key] = supplierBody[key];
+      } catch (error) {
+        console.log('updateSuppliersByIds Error:', error);
       }
     });
   });
