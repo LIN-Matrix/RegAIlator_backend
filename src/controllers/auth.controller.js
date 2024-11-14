@@ -84,9 +84,8 @@ const createSupplierBatch = catchAsync(async (req, res) => {
 });
 
 const updateSupplier = catchAsync(async (req, res) => {
-  const user = await userService.updateSupplierById(req.user.id, req.params.supplierId, req.body);
-  const suppliers = user.suppliers;
-  res.send(suppliers);
+  const supplier = await userService.updateSupplierById(req.user.id, req.params.supplierId, req.body);
+  res.send(supplier);
 });
 
 const updateSuppliers = catchAsync(async (req, res) => {

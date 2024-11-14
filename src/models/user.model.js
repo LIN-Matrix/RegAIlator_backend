@@ -36,13 +36,23 @@ const emailReplySchema = mongoose.Schema(
   }
 );
 
+const rawMaterialSchema = mongoose.Schema(
+  {
+    rawMaterialName: { type: String }, // Raw Material Name
+    rawMaterialPartNumber: { type: String }, // Raw Material Part Number
+  },
+  {
+    _id: true,
+    timestamps: true,
+  }
+);
+
 // Define a sub-schema for suppliers
 const supplierSchema = mongoose.Schema(
   {
     supplierName: { type: String, required: true }, // Supplier name
     contact: { type: String, trim: true },          // Contact
-    materialName: { type: String },                 // Material Name
-    partNumber: { type: String },                   // Part Number
+    rawMaterials: { type: [rawMaterialSchema], default: [] }, // List of raw materials
     chooseSurvey: { type: ObjectId, ref: 'Survey', default: null }, // Choose Survey (list of ObjectIds)
     status: { type: String },                       // Status
     feedback: { type: [emailReplySchema], default: [] }, // List of email replies (emailReply)
