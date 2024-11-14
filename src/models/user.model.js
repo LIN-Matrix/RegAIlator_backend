@@ -47,6 +47,8 @@ const supplierSchema = mongoose.Schema(
     status: { type: String },                       // Status
     feedback: { type: [emailReplySchema], default: [] }, // List of email replies (emailReply)
     supplierDocuments: { type: String },            // Supplier Documents
+    nextEmailSendTime: { type: Date, default: null }, // The time for the next email reminder
+    isEmailSent: { type: Boolean, default: false }, // Whether the email has been sent
   },
   {
     _id: true,

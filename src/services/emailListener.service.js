@@ -154,6 +154,9 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
         continue;
       }
       supplier.feedback.push(email);
+      // supplier 的 nextEmailSendTime 和 isEmailSent 需要更新
+      supplier.nextEmailSendTime = null;
+      supplier.isEmailSent = false;
       await user.save();
     }
   } catch (error) {
