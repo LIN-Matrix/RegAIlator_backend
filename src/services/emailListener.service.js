@@ -180,6 +180,7 @@ const emailListener = (io) => {
       idleInterval: 300000, // 5分钟空闲后发送 NOOP
       forceNoop: true, // 如果服务器不支持 IDLE，强制使用 NOOP 命令
     },
+    connectTimeout: 100000, // 设置连接超时为10秒
   };
 
   const imap = new Imap(imapConfig);
@@ -282,8 +283,10 @@ const emailListener = (io) => {
       setTimeout(connectToImap, 5000); // 等待5秒后重新连接
     } else {
       // 处理其他错误
-      console.error('IMAP 发生未知错误');
-      process.exit(1); // 或者根据需要采取其他措施
+      console.error('IMAP connection error:', err);
+      // process.exit(1); // 或者根据需要采取其他措施
+      // 重新连接
+      setTimeout(connectToImap, 5000);
     }
   });
 
