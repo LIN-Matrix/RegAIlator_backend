@@ -29,4 +29,14 @@ def from_text_to_general_template_using_llm(text, input_length=16385, answer_len
             # max_tokens=answer_length,  # 控制生成的回复长度(最大为4096)
             # temperature=0.1,  # 控制生成文本的创造性（0-1之间，越高越随机）
         )
-        return response1.choices[0].message.content
+        def remove_comments(text):
+            """
+            从文本中移除以 // 开头的注释行（包括前面的空格）。
+            """
+            return '\n'.join(
+                line for line in text.splitlines() if not line.strip().startswith("//")
+            )
+        # 获取内容并移除注释行
+        content = response1.choices[0].message.content
+        cleaned_content = remove_comments(content)
+        return cleaned_content

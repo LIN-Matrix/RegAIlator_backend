@@ -51,7 +51,7 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
 const sendMentionEmail = catchAsync(async (req, res) => {
   const user = await userService.getSuppliersbyId(req.user.id);
   if (!req.body.survey) {
-    await emailService.sendMentionEmail(user.email, req.body.email, "This is the default title", "This is the default content.", null, user.email);
+    await emailService.sendMentionEmail(req.body.email, "This is the default title", "This is the default content.", null, user.email);
   } else {
     const survey = await user.surveys.id(req.body.survey._id);
     const attachments = survey.attachments.map(attachment => ({
@@ -60,7 +60,7 @@ const sendMentionEmail = catchAsync(async (req, res) => {
       contentType: attachment.contentType,
       path: path.join(__dirname, '../..', attachment.content.replace('/api/uploads/', 'uploads/')),
     }));
-    await emailService.sendMentionEmail(user.email, req.body.email, survey.title, survey.content, attachments, user.email);
+    await emailService.sendMentionEmail(req.body.email, survey.title, survey.content, attachments, user.email);
   }
   res.send({ message: 'Mention email sent' });
 });

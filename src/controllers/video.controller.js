@@ -29,7 +29,7 @@ const fileStorage = multer.diskStorage({
   },
 });
 
-const uploadVideos = multer({ storage: fileStorage }).array('file', 10);
+const uploadVideos = multer({ storage: fileStorage }).array('file', 100);
 
 const createVideo = catchAsync(async (req, res) => {
   const reqBody = {
@@ -205,19 +205,19 @@ const parseVideos = catchAsync(async (req, res) => {
               const parsedData = JSON.parse(pythonOutput);
               console.log(parsedData);
 
-              // 更新文件信息到数据库
-              await videoService.updateVideoById(video._id, {
+                // 更新文件信息到数据库
+                await videoService.updateVideoById(video._id, {
                 json: parsedData // 如果你想存储解析的数据
-              });
-              results.push({
-                file: video.title,
-                result: parsedData,
-              });
-              if (results.length === videos.results.length) {
+                });
+                results.push({
+                  file: video.title,
+                  result: parsedData,
+                });
+                if (results.length === videos.results.length) {
                   res.status(200).json({
-                      status: true,
-                      message: 'Files processed successfully',
-                      files: results,
+                    status: true,
+                    message: 'Files processed successfully',
+                    files: results,
                   });
               }
           } else {

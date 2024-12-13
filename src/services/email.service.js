@@ -23,7 +23,7 @@ if (config.env !== 'test') {
  * @returns {Promise}
  */
 const sendEmail = async (to, subject, text) => {
-  const msg = { from: config.email.from, to, subject, text };
+  const msg = { from: config.email.smtp.auth.user, to, subject, text };
   await transport.sendMail(msg);
 };
 
@@ -62,8 +62,8 @@ If you did not create an account, then ignore this email.`;
   await sendEmail(to, subject, text);
 };
 
-const sendMentionEmail = async (from, to, subject, content, attachments = null, cc = null) => {
-  const msg = { from, to, subject, text: content, cc, attachments };
+const sendMentionEmail = async (to, subject, content, attachments = null, cc = null) => {
+  const msg = { from: config.email.smtp.auth.user, to, subject, text: content, cc, attachments };
   await transport.sendMail(msg);
 }
 
