@@ -60,7 +60,7 @@ const sendMentionEmail = catchAsync(async (req, res) => {
       contentType: attachment.contentType,
       path: path.join(__dirname, '../..', attachment.content.replace('/api/uploads/', 'uploads/')),
     }));
-    await emailService.sendMentionEmail(req.body.email, survey.title, survey.content, attachments, user.email);
+    await emailService.sendMentionEmail(req.body.email, survey.title, survey.html, attachments, user.email);
   }
   res.send({ message: 'Mention email sent' });
 });

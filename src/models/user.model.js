@@ -68,12 +68,13 @@ const supplierSchema = mongoose.Schema(
 
 const surveySchema = mongoose.Schema(
   {
-    title: { type: String, required: true }, // Survey的标题(创造者-时间-名称)
-    name: { type: String, required: true }, // 调查的名字
-    content: { type: String, required: true }, // 调查的内容
-    description: { type: String }, // 调查的描述
+    title: { type: String, required: true }, // 调查的标题
+    // name: { type: String, required: true }, // 调查的名字
+    // content: { type: String, required: true }, // 调查的内容
+    // description: { type: String }, // 调查的描述
     attachments: { type: [attachmentSchema], default: [] }, // 调查的附件
     revision: { type: Number, default: 0 }, // 调查的版本号
+    html: { type: String }, // 调查的HTML
     createdAt: { type: Date, default: Date.now }, // 调查的创建时间
     updatedAt: { type: Date }, // 调查的更新时间
   },
