@@ -5,7 +5,6 @@ const logger = require('../configs/logger');
 const transport = nodemailer.createTransport(config.email.smtp);
 /* istanbul ignore next */
 if (config.env !== 'test') {
-
   transport
     .verify()
     .then(() => logger.info('Connected to email server'))
@@ -55,7 +54,7 @@ const sendVerificationEmail = async (to, token) => {
   const verificationEmailUrl = `${config.web_host}/verify-email?token=${token}`;
   const text = `Dear user,
 
-Welcome to The Extended Reality Initiative (XRi) at Kent State.
+Welcome to The Regailator.
 
 To verify your email, click on this link: ${verificationEmailUrl}
 If you did not create an account, then ignore this email.`;
@@ -65,7 +64,7 @@ If you did not create an account, then ignore this email.`;
 const sendMentionEmail = async (to, subject, html, attachments = null, cc = null) => {
   const msg = { from: config.email.smtp.auth.user, to, subject, html, cc, attachments };
   await transport.sendMail(msg);
-}
+};
 
 module.exports = {
   transport,
