@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
+const path = require('path');
 const catchAsync = require('../utils/catchAsync');
 const { authService, userService, tokenService, emailService, materialService } = require('../services');
-const path = require('path');
 const pick = require('../utils/pick');
 
 const register = catchAsync(async (req, res) => {
@@ -51,35 +51,54 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
 const sendMentionEmail = catchAsync(async (req, res) => {
   const user = await userService.getSuppliersbyId(req.user.id);
   if (!req.body.survey) {
-    await emailService.sendMentionEmail(req.body.email, "This is the default title", "This is the default content.", null, user.email);
+    await emailService.sendMentionEmail(
+      req.body.email,
+      'This is the default title',
+      'This is the default content.',
+      null,
+      user.email
+    );
   } else {
     const survey = await user.surveys.id(req.body.survey._id);
-    const attachments = survey.attachments.map(attachment => ({
+    const attachments = (survey.attachments || []).map((attachment) => ({
       filename: attachment.filename,
       size: attachment.size,
       contentType: attachment.contentType,
       path: path.join(__dirname, '../..', attachment.content.replace('/api/uploads/', 'uploads/')),
     }));
-    await emailService.sendMentionEmail(req.body.email, survey.title, survey.html, attachments, user.email);
+
+    const { rawMaterials } = req.body.survey;
+    const finalAttachments = [
+      ...attachments,
+      ...(rawMaterials
+        ? [
+            {
+              filename: 'RawMaterialsList.csv',
+              content: rawMaterials,
+            },
+          ]
+        : []),
+    ];
+    await emailService.sendMentionEmail(req.body.email, survey.title, survey.html, finalAttachments, user.email);
   }
   res.send({ message: 'Mention email sent' });
 });
 
 const getMySuppliers = catchAsync(async (req, res) => {
   const user = await userService.getSuppliersbyId(req.user.id);
-  const suppliers = user.suppliers;
+  const { suppliers } = user;
   res.send(suppliers);
 });
 
 const createSupplier = catchAsync(async (req, res) => {
   const user = await userService.createSupplier(req.user.id, req.body);
-  const suppliers = user.suppliers;
+  const { suppliers } = user;
   res.send(suppliers);
 });
 
 const createSupplierBatch = catchAsync(async (req, res) => {
   const user = await userService.createSupplierBatch(req.user.id, req.body);
-  const suppliers = user.suppliers;
+  const { suppliers } = user;
   res.send(suppliers);
 });
 
@@ -90,19 +109,19 @@ const updateSupplier = catchAsync(async (req, res) => {
 
 const updateSuppliers = catchAsync(async (req, res) => {
   const user = await userService.updateSuppliersByIds(req.user.id, req.body);
-  const suppliers = user.suppliers;
+  const { suppliers } = user;
   res.send(suppliers);
 });
 
 const deleteSuppliers = catchAsync(async (req, res) => {
   const user = await userService.deleteSuppliersById(req.user.id, req.body.supplierIds);
-  const suppliers = user.suppliers;
+  const { suppliers } = user;
   res.send(suppliers);
 });
 
 const getMySurveys = catchAsync(async (req, res) => {
   const user = await userService.getSurveyById(req.user.id);
-  const surveys = user.surveys;
+  const { surveys } = user;
   res.send(surveys);
 });
 
@@ -114,7 +133,7 @@ const createSurvey = async (req, res) => {
 
   // 处理上传的文件
   if (req.files) {
-    surveyData.attachments = req.files.map(file => ({
+    surveyData.attachments = req.files.map((file) => ({
       content: `/api/uploads/${file.filename}`, // 根据您的存储方式调整
       filename: file.originalname,
       size: file.size,
@@ -123,9 +142,9 @@ const createSurvey = async (req, res) => {
   }
 
   const user = await userService.createSurvey(req.user.id, surveyData);
-  const surveys = user.surveys;
+  const { surveys } = user;
   res.send(surveys);
-}
+};
 
 const updateSurveyAttachments = catchAsync(async (req, res) => {
   const surveyData = {
@@ -133,7 +152,7 @@ const updateSurveyAttachments = catchAsync(async (req, res) => {
   };
   // 处理上传的文件
   if (req.files) {
-    surveyData.add_attachments = req.files.map(file => ({
+    surveyData.add_attachments = req.files.map((file) => ({
       content: `/api/uploads/${file.filename}`, // 根据您的存储方式调整
       filename: file.originalname,
       size: file.size,
@@ -141,19 +160,19 @@ const updateSurveyAttachments = catchAsync(async (req, res) => {
     }));
   }
   const user = await userService.updateSurveyById(req.user.id, req.params.surveyId, surveyData);
-  const surveys = user.surveys;
+  const { surveys } = user;
   res.send(surveys);
 });
 
 const updateSurvey = catchAsync(async (req, res) => {
   const user = await userService.updateSurveyById(req.user.id, req.params.surveyId, req.body);
-  const surveys = user.surveys;
+  const { surveys } = user;
   res.send(surveys);
 });
 
 const deleteSurveys = catchAsync(async (req, res) => {
   const user = await userService.deleteSurveysById(req.user.id, req.body.surveyIds);
-  const surveys = user.surveys;
+  const { surveys } = user;
   res.send(surveys);
 });
 
