@@ -14,9 +14,15 @@ const extractEmail = (fromText) => {
   return emailMatch ? emailMatch[1] : fromText;
 };
 
+// Helper function to extract all email addresses from a text
+const extractEmails = (text) => {
+  const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi;
+  return text.match(emailRegex) || [];
+};
+
 const saveEmailReply = async (parsed, bodyBuffer) => {
   try {
-    // 检查并创建附件存储文件夹
+    // Ensure the attachments directory exists
     const attachmentsDir = path.join(__dirname, '../../attachments');
     if (!fs.existsSync(attachmentsDir)) {
       fs.mkdirSync(attachmentsDir);
@@ -28,10 +34,19 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
       cc: parsed.cc ? extractEmail(parsed.cc.text) : undefined,
       subject: parsed.subject,
       date: parsed.date,
-      content: bodyBuffer || 'No body content', // 使用已经解码的正文
-      attachments: [], // 初始化附件数组
+      content: bodyBuffer || 'No body content',
+      attachments: [],
     };
 
+    // Extract all email addresses from the email content
+    const contentEmails = extractEmails(email.content.toLowerCase());
+    // Remove duplicates by creating a Set
+    const uniqueContentEmails = [...new Set(contentEmails)];
+
+    // if (uniqueContentEmails.length === 0) {
+    //   console.log('No email addresses found in email content.');
+    //   return;
+    // }
     let users = [];
     if (email.cc) {
       // 邮箱字符检查时忽略大小写
@@ -39,11 +54,11 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
       if (user) {
         users.push(user);
         // console.log(`User found with email: ${email.cc}`);
-      } else {
-        console.log(`No user found with email: ${email.cc}`);
-        return;
       }
-    } else {
+    }
+    // [MARK] check 1
+    if (users.length === 0) {
+      console.log(`No user found with email: ${email.cc}`);
       // 查找用户并保存反馈信息
       const all_users = await User.find();
       // 邮箱字符检查时忽略大小写
@@ -51,31 +66,57 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
         // user.suppliers.some((supplier) => supplier.contact === email.from)
         user.suppliers.some((supplier) => supplier.contact?.toLowerCase() === email.from?.toLowerCase())
       );
-      // console.log(`Users ${users.length} still found with supplier's email: ${email.from}`);
     }
-    if (!users || !users.length) {
+    // [MARK] check 2
+    if (users.length === 0) {
       console.log(`No suppliers found with email: ${email.from}`);
+      // Find all users whose suppliers have contact emails matching any of the extracted emails
+      users = await User.find({
+        'suppliers.contact': { $in: uniqueContentEmails },
+      }).lean(); // Using lean() for better performance since we don't need full Mongoose documents here
+    }
+    // [MARK] check 3
+    if (users.length === 0) {
+      console.log(`No user found suppliers with email: ${uniqueContentEmails}`);
       return;
     }
 
-    // 如果有附件
+    // Collect all matching suppliers across all users
+    let matchingSuppliers = [];
+    for (const user of users) {
+      const matched = user.suppliers
+        .filter(
+          (supplier) =>
+            supplier.contact?.toLowerCase() === email.from?.toLowerCase() ||
+            (supplier.contact && uniqueContentEmails.includes(supplier.contact.toLowerCase()))
+        )
+        .map((supplier) => ({ supplier, user }));
+      matchingSuppliers = matchingSuppliers.concat(matched);
+    }
+
+    if (matchingSuppliers.length === 0) {
+      console.log('No suppliers found matching email addresses in content.');
+      return;
+    }
+
+    // Process attachments if any
     if (parsed.attachments && parsed.attachments.length > 0) {
       for (const att of parsed.attachments) {
         try {
-          // 生成唯一的文件名
+          // Generate a unique filename
           const uniqueFileName = `${uuidv4()}.${mime.extension(att.contentType) || 'bin'}`;
 
-          // 构建保存文件的完整路径
-          const filePath = path.join(__dirname, '../../attachments', uniqueFileName);
+          // Define the full path to save the attachment
+          const filePath = path.join(attachmentsDir, uniqueFileName);
 
-          // 将内容写入文件
+          // Save the attachment to the filesystem
           fs.writeFileSync(filePath, att.content);
 
           const fileUrl = `/api/attachments/${uniqueFileName}`;
 
           console.log(`Attachment saved to: ${fileUrl}`);
 
-          // 更新 email.attachments
+          // Add attachment details to the email object
           email.attachments.push({
             filename: att.filename,
             contentType: att.contentType,
@@ -83,85 +124,96 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
             content: fileUrl,
           });
 
-          // 如果类型是pdf，调用 Python 脚本进行解析
-          console.log(`Attachment content type: ${att.contentType}`);
-          // if (att.contentType === 'application/pdf' || att.contentType === 'pdf') {
-          //   // 调用 Python 脚本进行解析
-          //   const pythonProcess = spawn('python', [path.join(__dirname, '../python/parse_files.py'), filePath]);
-          //   let pythonOutput = '';
-          //   pythonProcess.stdout.on('data', (data) => {
-          //     pythonOutput += data.toString();
-          //   });
-          //   pythonProcess.stderr.on('data', (data) => {
-          //     console.error(`stderr: ${data}`);
-          //   });
-          //   pythonProcess.on('close', async (code) => {
-          //     if (code === 0) {
-          //       try {
-          //         const parsedData = JSON.parse(pythonOutput);
-          //         // 保存文件信息到数据库
-          //         for (let user of users) {
-          //           const supplier = user.suppliers.find((supplier) => supplier.contact?.toLowerCase() === email.from?.toLowerCase());
-          //           if (!supplier) {
-          //             console.log(`No supplier found with email: ${email.from}`);
-          //             continue;
-          //           }
-          //           await videoService.createVideo({
-          //             title: att.filename,
-          //             path: fileUrl,
-          //             addedBy: users[0]._id,
-          //             json: parsedData, // 如果你想存储解析的数据
-          //             supplier: supplier._id,
-          //           });
-          //         }
-          //       } catch (videoError) {
-          //         console.error('Error saving video information:', videoError);
-          //       }
-          //     } else {
-          //       console.error('Error processing file with Python script');
-          //     }
-          //   });
-          // } else {
-            const parsedData = {};
-            // 保存文件信息到数据库
-            for (let user of users) {
-              const supplier = user.suppliers.find((supplier) => supplier.contact?.toLowerCase() === email.from?.toLowerCase());
-              if (!supplier) {
-                console.log(`No supplier found with email: ${email.from}`);
-                continue;
+          // Example: If you need to process the attachment further (e.g., parsing PDFs)
+          // Uncomment and modify the following block as needed
+          /*
+          if (att.contentType === 'application/pdf') {
+            const pythonProcess = spawn('python', [path.join(__dirname, '../python/parse_files.py'), filePath]);
+            let pythonOutput = '';
+            pythonProcess.stdout.on('data', (data) => {
+              pythonOutput += data.toString();
+            });
+            pythonProcess.stderr.on('data', (data) => {
+              console.error(`stderr: ${data}`);
+            });
+            pythonProcess.on('close', async (code) => {
+              if (code === 0) {
+                try {
+                  const parsedData = JSON.parse(pythonOutput);
+                  for (let { supplier, user } of matchingSuppliers) {
+                    await videoService.createVideo({
+                      title: att.filename,
+                      path: fileUrl,
+                      addedBy: user._id,
+                      json: parsedData,
+                      supplier: supplier._id,
+                    });
+                  }
+                } catch (videoError) {
+                  console.error('Error saving video information:', videoError);
+                }
+              } else {
+                console.error('Error processing file with Python script');
               }
+            });
+          } else {
+            // For non-PDF attachments or if not processing via Python
+            const parsedData = {};
+            for (let { supplier, user } of matchingSuppliers) {
               await videoService.createVideo({
                 title: att.filename,
                 path: fileUrl,
-                addedBy: users[0]._id,
-                json: parsedData, // 如果你想存储解析的数据
+                addedBy: user._id,
+                json: parsedData,
                 supplier: supplier._id,
               });
             }
-          // }
+          }
+          */
+
+          // Since the Python processing is commented out, we'll handle non-PDF attachments here
+          const parsedData = {};
+          for (let { supplier, user } of matchingSuppliers) {
+            await videoService.createVideo({
+              title: att.filename,
+              path: fileUrl,
+              addedBy: user._id,
+              json: parsedData, // Store parsed data if available
+              supplier: supplier._id,
+            });
+          }
         } catch (attError) {
           console.error(`Error processing attachment ${att.filename}:`, attError);
         }
       }
     }
 
-    // console.log('Email:', email);
-
-    for (let user of users) {
-      const supplier = user.suppliers.find((supplier) => supplier.contact.toLowerCase() === email.from.toLowerCase());
-      if (!supplier) {
-        console.log(`No supplier found with email: ${email.from}`);
-        continue;
-      }
+    // Assign the email to each matching supplier
+    for (let { supplier, user } of matchingSuppliers) {
+      // Push the email to the supplier's feedback
       supplier.feedback.push(email);
-      // supplier 的 nextEmailSendTime 和 isEmailSent 需要更新
+
+      // Update supplier's email sending status
       supplier.nextEmailSendTime = null;
       supplier.isEmailSent = false;
-      await user.save();
+
+      // Save the user document
+      await User.updateOne(
+        { _id: user._id, 'suppliers._id': supplier._id },
+        {
+          $push: { 'suppliers.$.feedback': email },
+          $set: {
+            'suppliers.$.nextEmailSendTime': null,
+            'suppliers.$.isEmailSent': false,
+          },
+        }
+      );
     }
+
+    console.log('Email successfully assigned to matching suppliers.');
   } catch (error) {
     console.error('Error in saveEmailReply:', error);
-    // 根据需要决定是否抛出错误或在此处理
+    // Optionally, rethrow the error or handle it as needed
   }
 };
 
