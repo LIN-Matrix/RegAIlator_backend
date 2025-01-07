@@ -9,7 +9,7 @@ const { ObjectId } = mongoose.SchemaTypes;
 // Define attachment sub-schema
 const attachmentSchema = mongoose.Schema(
   {
-    filename: { type: String, required: true }, // 附件的文件名
+    filename: { type: String, required: false }, // 附件的文件名（可以不存在）
     contentType: { type: String, required: true }, // 附件的类型
     size: { type: Number, required: true }, // 附件的大小
     content: { type: String, required: true }, // 附件的内容
