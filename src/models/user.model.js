@@ -29,6 +29,7 @@ const emailReplySchema = mongoose.Schema(
     to: { type: String, required: true }, // 收件人邮箱
     date: { type: Date, required: true }, // 邮件发送日期
     attachments: { type: [attachmentSchema], default: [] }, // 邮件的附件（可以是多个）
+    tags: { type: [String], default: [] }, // 邮件的标签
   },
   {
     _id: true,

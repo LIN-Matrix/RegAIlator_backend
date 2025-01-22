@@ -100,6 +100,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
     }
 
     // Process attachments if any
+    const pdfPaths = [];
     if (parsed.attachments && parsed.attachments.length > 0) {
       for (const att of parsed.attachments) {
         try {
@@ -111,6 +112,8 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
 
           // Save the attachment to the filesystem
           fs.writeFileSync(filePath, att.content);
+
+          pdfPaths.push(filePath);
 
           const fileUrl = `/api/attachments/${uniqueFileName}`;
 
@@ -187,6 +190,41 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
         }
       }
     }
+
+    const txtFileName = `${uuidv4()}.txt`;
+    const txtFilePath = path.join(attachmentsDir, txtFileName);
+    fs.writeFileSync(txtFilePath, email.content);
+
+    let tags = [];
+    const genTagsProcess = spawn('python', [
+      path.join(__dirname, '../python/gen_tags.py'),
+      txtFilePath,
+      pdfPaths.length,
+      ...pdfPaths,
+    ]);
+
+    let pythonOutput = '';
+    genTagsProcess.stdout.on('data', (data) => {
+      pythonOutput += data.toString();
+    });
+
+    genTagsProcess.stderr.on('data', (data) => {
+      console.error(`stderr: ${data}`);
+    });
+
+    genTagsProcess.on('close', async (code) => {
+      if (code === 0) {
+        try {
+          tags = JSON.parse(pythonOutput);
+        } catch (parseError) {
+          console.error('Error parsing tags:', parseError);
+        }
+      } else {
+        console.error('Error processing tags with Python script');
+      }
+    });
+
+    email.tags = tags;
 
     // Assign the email to each matching supplier
     for (let { supplier, user } of matchingSuppliers) {
