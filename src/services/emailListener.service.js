@@ -113,7 +113,9 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
           // Save the attachment to the filesystem
           fs.writeFileSync(filePath, att.content);
 
-          pdfPaths.push(filePath);
+          if (att.contentType === 'application/pdf' || att.contentType === 'pdf') {
+            pdfPaths.push(filePath);
+          }
 
           const fileUrl = `/api/attachments/${uniqueFileName}`;
 
