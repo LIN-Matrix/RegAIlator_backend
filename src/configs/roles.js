@@ -1,7 +1,9 @@
-const { Survey } = require("../models");
+const { Survey } = require('../models');
 
 const subUserRoles = {
   user: 'user',
+  admin: 'admin',
+  guest: 'guest',
 };
 
 const accessCategories = {
@@ -34,45 +36,19 @@ const accessCategories = {
     getSurveyTemplates: 'getSurveyTemplates',
     manageSurveyTemplates: 'manageSurveyTemplates',
     all: ['getSurveyTemplates', 'manageSurveyTemplates'],
-  }
+  },
 };
 
 const allRoles = {
-  admin: [
+  [subUserRoles.admin]: [
     ...accessCategories.user.all,
     ...accessCategories.videoGroup.all,
     ...accessCategories.video.all,
     ...accessCategories.watchLog.all,
     ...accessCategories.errorLog.all,
   ],
-  supervisor: [
-    ...accessCategories.user.all,
-    ...accessCategories.videoGroup.all,
-    ...accessCategories.video.all,
-    ...accessCategories.watchLog.all,
-    ...accessCategories.errorLog.all,
-  ],
-  manager: [
-    ...accessCategories.user.all,
-    ...accessCategories.videoGroup.all,
-    ...accessCategories.video.all,
-    ...accessCategories.watchLog.all,
-    ...accessCategories.errorLog.all,
-  ],
-  [subUserRoles.user]: [
-    ...accessCategories.user.all,
-    ...accessCategories.videoGroup.all,
-    ...accessCategories.video.all,
-    ...accessCategories.watchLog.all,
-    ...accessCategories.errorLog.all,
-  ],
-  guest: [
-    ...accessCategories.user.all,
-    ...accessCategories.videoGroup.all,
-    ...accessCategories.video.all,
-    ...accessCategories.watchLog.all,
-    ...accessCategories.errorLog.all,
-  ],
+  [subUserRoles.user]: [...accessCategories.user.all],
+  [subUserRoles.guest]: [],
 };
 
 const roles = Object.keys(allRoles);
