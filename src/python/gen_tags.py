@@ -14,7 +14,7 @@ def get_prompt():
     prompt_start = open(f'{dir_path}/./include/prompt_tags/prompt_start.in', 'r').read()
     prompt_examples = ""
     # 读取 prompt/examples 文件夹下 exp1.in
-    for i in [1]:
+    for i in [1, 2]:
         prompt_examples += open(f'{dir_path}/./include/prompt_tags/examples/exp{i}.in', 'r').read()
     prompt_end = open(f'{dir_path}/./include/prompt_tags/prompt_end.in', 'r').read()
     return prompt_start + prompt_examples + prompt_end
