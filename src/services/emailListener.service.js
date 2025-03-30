@@ -150,6 +150,8 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
 
           if (att.contentType === 'application/pdf' || att.contentType === 'pdf') {
             pdfPaths.push(filePath);
+          } else if (att.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+            pdfPaths.push(filePath);
           }
 
           const fileUrl = `/api/attachments/${uniqueFileName}`;
