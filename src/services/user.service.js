@@ -102,28 +102,16 @@ const updateSupplierById = async (userId, supplierId, supplierBody) => {
     //   }).sortBy('date')[0].tags = supplierBody[key];
     // }
     // 如果key是tags，那么找出最新的一个surveyId和supplier.chooseSurvey相同的feedback，然后更新tags
-    if (key === 'tags') {
-      const feedback = supplier.feedback.filter(f => f.surveyId.toString() === supplier.chooseSurvey.toString());
+    if (key === 'tags' || key === 'reply') {
+      const feedback = supplier.feedback.filter(f => f.surveyId === supplier.chooseSurvey);
       if (feedback.length > 0) {
         feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
-        feedback[0].tags = supplierBody[key];
+        feedback[0][key] = supplierBody[key];
       } else {
         const feedback = supplier.feedback.filter(f => f.surveyId === null);
         if (feedback.length > 0) {
           feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
-          feedback[0].tags = supplierBody[key];
-        }
-      }
-    } else if (key === 'reply') {
-      const feedback = supplier.feedback.filter(f => f.surveyId.toString() === supplier.chooseSurvey.toString());
-      if (feedback.length > 0) {
-        feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
-        feedback[0].reply = supplierBody[key];
-      } else {
-        const feedback = supplier.feedback.filter(f => f.surveyId === null);
-        if (feedback.length > 0) {
-          feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
-          feedback[0].reply = supplierBody[key];
+          feedback[0][key] = supplierBody[key];
         }
       }
     } else {
