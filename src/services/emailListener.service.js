@@ -20,6 +20,41 @@ const extractEmails = (text) => {
   return text.match(emailRegex) || [];
 };
 
+function runGenTagsScript(txtFilePath, pdfPaths) {
+  return new Promise((resolve, reject) => {
+    const genTagsProcess = spawn('python', [
+      path.join(__dirname, '../python/gen_tags.py'),
+      txtFilePath,
+      pdfPaths.length,
+      ...pdfPaths,
+    ]);
+
+    let pythonOutput = '';
+
+    genTagsProcess.stdout.on('data', (data) => {
+      pythonOutput += data.toString();
+    });
+
+    genTagsProcess.stderr.on('data', (data) => {
+      console.error(`stderr: ${data}`);
+    });
+
+    genTagsProcess.on('close', (code) => {
+      if (code === 0) {
+        try {
+          const result = JSON.parse(pythonOutput);
+          resolve(result);
+        } catch (err) {
+          reject(err);
+        }
+      } else {
+        reject(new Error('Python script failed with code ' + code));
+      }
+    });
+  });
+}
+
+
 const saveEmailReply = async (parsed, bodyBuffer) => {
   try {
     // Ensure the attachments directory exists
@@ -197,36 +232,11 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
     const txtFilePath = path.join(attachmentsDir, txtFileName);
     fs.writeFileSync(txtFilePath, email.content);
 
-    let tags = [];
-    const genTagsProcess = spawn('python', [
-      path.join(__dirname, '../python/gen_tags.py'),
-      txtFilePath,
-      pdfPaths.length,
-      ...pdfPaths,
-    ]);
-
-    let pythonOutput = '';
-    genTagsProcess.stdout.on('data', (data) => {
-      pythonOutput += data.toString();
-    });
-
-    genTagsProcess.stderr.on('data', (data) => {
-      console.error(`stderr: ${data}`);
-    });
-
-    genTagsProcess.on('close', async (code) => {
-      if (code === 0) {
-        try {
-          tags = JSON.parse(pythonOutput);
-        } catch (parseError) {
-          console.error('Error parsing tags:', parseError);
-        }
-      } else {
-        console.error('Error processing tags with Python script');
-      }
-    });
-
-    email.tags = tags;
+    const result = await runGenTagsScript(txtFilePath, pdfPaths);
+    console.log('Python script result:', result);
+    email.tags = result.tags;
+    email.reply = result.reply;
+    console.log('Email:', email);
 
     // Assign the email to each matching supplier
     for (let { supplier, user } of matchingSuppliers) {
