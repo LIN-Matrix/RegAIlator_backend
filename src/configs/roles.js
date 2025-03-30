@@ -47,7 +47,11 @@ const allRoles = {
     ...accessCategories.watchLog.all,
     ...accessCategories.errorLog.all,
   ],
-  [subUserRoles.user]: [...accessCategories.user.all],
+  [subUserRoles.user]: [
+    ...accessCategories.user.all, 
+    ...accessCategories.videoGroup.all, 
+    ...accessCategories.video.all
+  ],
   [subUserRoles.guest]: [],
 };
 
