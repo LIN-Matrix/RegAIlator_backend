@@ -230,6 +230,7 @@ const saveEmailReply = async (parsed, bodyBuffer) => {
 
     // Assign the email to each matching supplier
     for (let { supplier, user } of matchingSuppliers) {
+      email.surveyId = supplier.chooseSurvey;
       // Push the email to the supplier's feedback
       supplier.feedback.push(email);
 

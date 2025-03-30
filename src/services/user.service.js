@@ -96,10 +96,30 @@ const updateSupplierById = async (userId, supplierId, supplierBody) => {
     // if (supplier[key] !== undefined) {
     //   supplier[key] = supplierBody[key];
     // }
-    try {
-      supplier[key] = supplierBody[key];
-    } catch (error) {
-      console.log('updateSupplierById Error:', error);
+    // if (key === 'tags') {
+    //   supplier.feedback.findOne({
+    //     surveyId: supplier.chooseSurvey
+    //   }).sortBy('date')[0].tags = supplierBody[key];
+    // }
+    // 如果key是tags，那么找出最新的一个surveyId和supplier.chooseSurvey相同的feedback，然后更新tags
+    if (key === 'tags') {
+      const feedback = supplier.feedback.filter(f => f.surveyId.toString() === supplier.chooseSurvey.toString());
+      if (feedback.length > 0) {
+        feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
+        feedback[0].tags = supplierBody[key];
+      } else {
+        const feedback = supplier.feedback.filter(f => f.surveyId === null);
+        if (feedback.length > 0) {
+          feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
+          feedback[0].tags = supplierBody[key];
+        }
+      }
+    } else {
+      try {
+        supplier[key] = supplierBody[key];
+      } catch (error) {
+        console.log('updateSupplierById Error:', error);
+      }
     }
   });
   // 保存更改
