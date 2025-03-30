@@ -87,5 +87,4 @@ if __name__ == '__main__':
         concatenated_text = text_from_txt + read_pdfs_and_concatenate(args.n, args.pdf_paths)
         # Process the concatenated text with the LLM
         result = from_text_to_general_template_using_llm(concatenated_text, get_prompt())
-    print(result)
     print(json.dumps(result), flush=True)
