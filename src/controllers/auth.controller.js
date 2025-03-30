@@ -48,6 +48,12 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
   // res.send({ verifyEmailToken });
 });
 
+const sendReplyEmail = catchAsync(async (req, res) => {
+  const user = await userService.getSuppliersbyId(req.user.id);
+  await emailService.sendReplyEmail(req.body.email, req.body.subject, req.body.content, user.email);
+  res.send({ message: 'Reply email sent' });
+});
+
 const sendMentionEmail = catchAsync(async (req, res) => {
   const user = await userService.getSuppliersbyId(req.user.id);
   if (!req.body.survey) {
@@ -218,6 +224,7 @@ module.exports = {
   resetPassword,
   sendVerificationEmail,
   sendMentionEmail,
+  sendReplyEmail,
   verifyEmail,
   getMySuppliers,
   createSupplier,

@@ -17,6 +17,7 @@ router.post('/send-verification-email', auth(), authController.sendVerificationE
 router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail);
 // Supplier
 router.post('/send-mention-email', auth(), authController.sendMentionEmail);
+router.post('/send-reply-email', auth(), authController.sendReplyEmail);
 router.get('/my-suppliers', auth(), authController.getMySuppliers);
 router.post('/my-suppliers', auth(), authController.createSupplier);
 router.post('/my-suppliers-batch', auth(), authController.createSupplierBatch);

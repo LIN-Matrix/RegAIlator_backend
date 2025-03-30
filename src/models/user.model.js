@@ -31,6 +31,14 @@ const emailReplySchema = mongoose.Schema(
     attachments: { type: [attachmentSchema], default: [] }, // 邮件的附件（可以是多个）
     surveyId: { type: ObjectId, ref: 'Survey', default: null }, // 邮件关联的调查
     tags: { type: [String], default: [] }, // 邮件的标签
+    reply: { 
+      type: {
+        subject: { type: String, required: true }, // 回复的主题
+        content: { type: String, required: true }, // 回复的内容
+      }, 
+      default: null, 
+      required: false 
+    }, // 准备回复的内容（AI生成，可以为空）
   },
   {
     _id: true,

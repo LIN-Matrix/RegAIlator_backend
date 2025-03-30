@@ -114,6 +114,18 @@ const updateSupplierById = async (userId, supplierId, supplierBody) => {
           feedback[0].tags = supplierBody[key];
         }
       }
+    } else if (key === 'reply') {
+      const feedback = supplier.feedback.filter(f => f.surveyId.toString() === supplier.chooseSurvey.toString());
+      if (feedback.length > 0) {
+        feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
+        feedback[0].reply = supplierBody[key];
+      } else {
+        const feedback = supplier.feedback.filter(f => f.surveyId === null);
+        if (feedback.length > 0) {
+          feedback.sort((a, b) => new Date(b.date) - new Date(a.date));
+          feedback[0].reply = supplierBody[key];
+        }
+      }
     } else {
       try {
         supplier[key] = supplierBody[key];

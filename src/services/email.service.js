@@ -66,10 +66,17 @@ const sendMentionEmail = async (to, subject, html, attachments = null, cc = null
   await transport.sendMail(msg);
 };
 
+const sendReplyEmail = async (to, subject, text, cc = null) => {
+  const msg = { from: config.email.smtp.auth.user, to, subject, text, cc };
+  console.log('msg: ', msg);
+  await transport.sendMail(msg);
+};
+
 module.exports = {
   transport,
   sendEmail,
   sendResetPasswordEmail,
   sendVerificationEmail,
   sendMentionEmail,
+  sendReplyEmail,
 };
