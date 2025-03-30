@@ -42,6 +42,7 @@ function runGenTagsScript(txtFilePath, pdfPaths) {
     genTagsProcess.on('close', (code) => {
       if (code === 0) {
         try {
+          console.log('Python script output:', pythonOutput);
           const result = JSON.parse(pythonOutput);
           resolve(result);
         } catch (err) {

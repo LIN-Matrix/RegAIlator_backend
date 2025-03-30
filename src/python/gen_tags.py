@@ -3,7 +3,7 @@ import tqdm
 import sys
 from src.llm import from_text_to_general_template_using_llm
 from src.adaptor import from_general_template_to_xlsx
-from src.parse import extract_text_from_pdf
+from src.parse import extract_text_from_pdf, extract_text_from_xlsx
 from src.test import test_accuracy
 import os
 import json
